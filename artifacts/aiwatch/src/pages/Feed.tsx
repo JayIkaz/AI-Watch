@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useListUpdates, useListVendors, useListCategories } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
-import { Filter, X, Loader2, Database } from "lucide-react";
+import { Filter, X, Loader2, Database, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Feed() {
@@ -11,15 +11,19 @@ export default function Feed() {
   const [page, setPage] = useState(0);
   const limit = 20;
 
-  const { data: updatesData, isLoading: isLoadingUpdates } = useListUpdates({
-    query: {
-      queryKey: ["/api/v1/updates", selectedVendors.join(","), selectedCategories.join(","), page]
+  const { data: updatesData, isLoading: isLoadingUpdates } = useListUpdates(
+    {
+      vendor: selectedVendors.join(",") || undefined,
+      category: selectedCategories.join(",") || undefined,
+      limit,
+      offset: page * limit,
     },
-    vendor: selectedVendors.join(",") || undefined,
-    category: selectedCategories.join(",") || undefined,
-    limit,
-    offset: page * limit,
-  });
+    {
+      query: {
+        queryKey: ["/api/v1/updates", selectedVendors.join(","), selectedCategories.join(","), page],
+      },
+    }
+  );
 
   const { data: vendorsData } = useListVendors({});
   const { data: categoriesData } = useListCategories({});
