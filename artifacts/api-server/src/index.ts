@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { autoSeed } from "./lib/seed";
+import { runFullIngestion } from "./routes/ingestion";
 
 const rawPort = process.env["PORT"];
 
@@ -16,9 +17,30 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-autoSeed((msg) => logger.info(msg)).catch((err) => {
-  logger.warn({ err }, "Auto-seed failed (non-fatal)");
-});
+const INGESTION_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const STARTUP_DELAY_MS = 2 * 60 * 1000; // 2 minutes after boot
+
+async function startupRoutine() {
+  await autoSeed((msg) => logger.info(msg)).catch((err) => {
+    logger.warn({ err }, "Auto-seed failed (non-fatal)");
+  });
+
+  // Run initial ingestion after a short delay to let DB settle
+  setTimeout(async () => {
+    logger.info("Starting scheduled ingestion run");
+    await runFullIngestion().catch((err) => {
+      logger.warn({ err }, "Scheduled ingestion failed");
+    });
+
+    // Then run every 6 hours
+    setInterval(async () => {
+      logger.info("Starting scheduled ingestion run");
+      await runFullIngestion().catch((err) => {
+        logger.warn({ err }, "Scheduled ingestion failed");
+      });
+    }, INGESTION_INTERVAL_MS);
+  }, STARTUP_DELAY_MS);
+}
 
 app.listen(port, (err) => {
   if (err) {
@@ -27,4 +49,7 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  startupRoutine().catch((err) => {
+    logger.error({ err }, "Startup routine failed");
+  });
 });
