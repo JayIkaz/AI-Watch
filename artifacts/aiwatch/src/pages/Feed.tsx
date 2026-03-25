@@ -110,7 +110,7 @@ export default function Feed() {
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Categories</h3>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                   {categoriesData?.categories.map(cat => (
-                    <label key={cat.id} className="flex items-center gap-3 group cursor-pointer">
+                    <label key={cat.id} onClick={() => toggleCategory(cat.slug)} className="flex items-center gap-3 group cursor-pointer">
                       <div className={cn(
                         "w-4 h-4 rounded-md border flex items-center justify-center transition-colors",
                         selectedCategories.includes(cat.slug) ? "bg-primary border-primary" : "border-muted-foreground/30 group-hover:border-primary/50 bg-background"
@@ -129,7 +129,7 @@ export default function Feed() {
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Vendors</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
                   {vendorsData?.vendors.map(vendor => (
-                    <label key={vendor.id} className="flex items-center gap-3 group cursor-pointer">
+                    <label key={vendor.id} onClick={() => toggleVendor(vendor.slug)} className="flex items-center gap-3 group cursor-pointer">
                       <div className={cn(
                         "w-4 h-4 rounded-md border flex items-center justify-center transition-colors shrink-0",
                         selectedVendors.includes(vendor.slug) ? "bg-primary border-primary" : "border-muted-foreground/30 group-hover:border-primary/50 bg-background"
