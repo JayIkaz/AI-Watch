@@ -1,0 +1,21 @@
+packages:
+  "framer-motion": "For premium page transitions and micro-interactions"
+  "date-fns": "For human-readable date formatting in the feed"
+  "clsx": "For conditional class merging"
+  "tailwind-merge": "For tailwind class conflict resolution"
+  "react-hook-form": "For robust settings and API key forms"
+  "@hookform/resolvers": "For Zod schema validation in forms"
+  "zod": "For strict form validation"
+
+images:
+  - path: "artifacts/aiwatch/public/images/login-bg.png"
+    description: "Abstract dark mode intelligence dashboard background with glowing cyan data nodes and geometric network lines, highly technical, premium"
+    aspect_ratio: "16:9"
+  - path: "artifacts/aiwatch/public/images/logo.png"
+    description: "Minimalist geometric eye logo in glowing cyan and dark blue, representing an AI watcher, clean, transparent background"
+    aspect_ratio: "1:1"
+
+notes:
+  - "Importing generated TanStack Query hooks directly from @workspace/api-client-react"
+  - "Using wouter for routing as requested"
+  - "Auth is handled via /api/auth/me and Replit Auth at /api/login"

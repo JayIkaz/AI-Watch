@@ -1,22 +1,37 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 1.0.0
+  description: AIWatch API - Unified AI update intelligence feed
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: vendors
+    description: AI vendor operations
+  - name: categories
+    description: Update category operations
+  - name: updates
+    description: AI update feed operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User profile and preferences
+  - name: feeds
+    description: RSS/Atom feed operations
+  - name: apikeys
+    description: API key management
+  - name: ingestion
+    description: Data ingestion pipeline operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +39,726 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /v1/vendors:
+    get:
+      operationId: listVendors
+      tags: [vendors]
+      summary: List all tracked AI vendors
+      parameters:
+        - name: tier
+          in: query
+          schema:
+            type: integer
+            enum: [1, 2, 3]
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of vendors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vendors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Vendor"
+                required: [vendors]
+
+  /v1/vendors/{slug}:
+    get:
+      operationId: getVendor
+      tags: [vendors]
+      summary: Get a single vendor by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vendor details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vendor"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all update categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Category"
+                required: [categories]
+
+  /v1/updates:
+    get:
+      operationId: listUpdates
+      tags: [updates]
+      summary: List AI updates with optional filters
+      parameters:
+        - name: vendor
+          in: query
+          description: Filter by vendor slug (comma-separated for multiple)
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Filter by category slug (comma-separated for multiple)
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          description: Keyword search in title and summary
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: flagged
+          in: query
+          description: Filter by review flag status
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Paginated list of updates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatesResponse"
+
+  /v1/updates/{id}:
+    get:
+      operationId: getUpdate
+      tags: [updates]
+      summary: Get a single update by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Update details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Update"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/updates/{id}/flag:
+    patch:
+      operationId: flagUpdate
+      tags: [updates]
+      summary: Flag or unflag an update for review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlagUpdateBody"
+      responses:
+        "200":
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Update"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/users/preferences:
+    get:
+      operationId: getUserPreferences
+      tags: [users]
+      summary: Get current user preferences
+      responses:
+        "200":
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateUserPreferences
+      tags: [users]
+      summary: Update user preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPreferencesBody"
+      responses:
+        "200":
+          description: Updated preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/apikeys:
+    get:
+      operationId: listApiKeys
+      tags: [apikeys]
+      summary: List user API keys
+      responses:
+        "200":
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiKeyInfo"
+                required: [keys]
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createApiKey
+      tags: [apikeys]
+      summary: Create a new API key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApiKeyBody"
+      responses:
+        "201":
+          description: Created API key (token shown once)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyCreated"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/apikeys/{id}:
+    delete:
+      operationId: deleteApiKey
+      tags: [apikeys]
+      summary: Revoke an API key
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/ingestion/trigger:
+    post:
+      operationId: triggerIngestion
+      tags: [ingestion]
+      summary: Manually trigger the ingestion pipeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TriggerIngestionBody"
+      responses:
+        "200":
+          description: Ingestion triggered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestionResult"
+
+  /v1/ingestion/status:
+    get:
+      operationId: getIngestionStatus
+      tags: [ingestion]
+      summary: Get ingestion pipeline status
+      responses:
+        "200":
+          description: Pipeline status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestionStatus"
+
 components:
+  parameters:
+    AuthorizationSessionHeader:
+      name: Authorization
+      in: header
+      required: false
+      description: Opaque session token — `Bearer <sid>`.
+      schema:
+        type: string
+    SessionCookie:
+      name: sid
+      in: cookie
+      required: false
+      description: Browser session cookie.
+      schema:
+        type: string
+
   schemas:
+    AuthUser:
+      type: object
+      required: [id, email, firstName, lastName, profileImageUrl]
+      properties:
+        id:
+          type: string
+        email:
+          type: [string, "null"]
+          format: email
+        firstName:
+          type: [string, "null"]
+        lastName:
+          type: [string, "null"]
+        profileImageUrl:
+          type: [string, "null"]
+    AuthUserEnvelope:
+      type: object
+      required: [user]
+      properties:
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/AuthUser"
+            - type: "null"
+    MobileTokenExchangeRequest:
+      type: object
+      required: [code, code_verifier, redirect_uri, state]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        code_verifier:
+          type: string
+          minLength: 1
+        redirect_uri:
+          type: string
+          minLength: 1
+          format: uri
+        state:
+          type: string
+          minLength: 1
+        nonce:
+          type: string
+          minLength: 1
+    MobileTokenExchangeSuccess:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+    LogoutSuccess:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error]
+
+    Vendor:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        websiteUrl:
+          type: string
+          nullable: true
+        tier:
+          type: integer
+          enum: [1, 2, 3]
+        active:
+          type: boolean
+        updateCount:
+          type: integer
+        lastUpdateAt:
+          type: string
+          format: date-time
+          nullable: true
+      required: [id, slug, name, tier, active, updateCount]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        color:
+          type: string
+          nullable: true
+        updateCount:
+          type: integer
+      required: [id, slug, name, updateCount]
+
+    Update:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+          nullable: true
+        rawContent:
+          type: string
+          nullable: true
+        sourceUrl:
+          type: string
+          nullable: true
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        detectedAt:
+          type: string
+          format: date-time
+        confidenceScore:
+          type: number
+          nullable: true
+        flaggedForReview:
+          type: boolean
+        highImpact:
+          type: boolean
+        whyItMatters:
+          type: string
+          nullable: true
+        vendor:
+          $ref: "#/components/schemas/VendorRef"
+        category:
+          $ref: "#/components/schemas/CategoryRef"
+      required: [id, title, detectedAt, flaggedForReview, highImpact, vendor, category]
+
+    VendorRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        logoUrl:
+          type: string
+          nullable: true
+      required: [id, slug, name]
+
+    CategoryRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+          nullable: true
+      required: [id, slug, name]
+
+    UpdatesResponse:
+      type: object
+      properties:
+        updates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Update"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required: [updates, total, limit, offset]
+
+    FlagUpdateBody:
+      type: object
+      properties:
+        flagged:
+          type: boolean
+      required: [flagged]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+          nullable: true
+        profileImageUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, createdAt]
+
+    UserPreferences:
+      type: object
+      properties:
+        vendorSlugs:
+          type: array
+          items:
+            type: string
+        categorySlugs:
+          type: array
+          items:
+            type: string
+        digestFrequency:
+          type: string
+          enum: [none, daily, weekly]
+        alertKeywords:
+          type: array
+          items:
+            type: string
+        emailAlerts:
+          type: boolean
+      required: [vendorSlugs, categorySlugs, digestFrequency, alertKeywords, emailAlerts]
+
+    UserPreferencesBody:
+      type: object
+      properties:
+        vendorSlugs:
+          type: array
+          items:
+            type: string
+        categorySlugs:
+          type: array
+          items:
+            type: string
+        digestFrequency:
+          type: string
+          enum: [none, daily, weekly]
+        alertKeywords:
+          type: array
+          items:
+            type: string
+        emailAlerts:
+          type: boolean
+
+    ApiKeyInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        keyPrefix:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        requestCount:
+          type: integer
+      required: [id, name, keyPrefix, createdAt, requestCount]
+
+    CreateApiKeyBody:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+
+    ApiKeyCreated:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        key:
+          type: string
+          description: Full API key token — shown only once
+        keyPrefix:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, key, keyPrefix, createdAt]
+
+    TriggerIngestionBody:
+      type: object
+      properties:
+        vendorSlugs:
+          type: array
+          items:
+            type: string
+          description: Specific vendors to ingest. Empty means all.
+        tier:
+          type: integer
+          enum: [1, 2, 3]
+
+    IngestionResult:
+      type: object
+      properties:
+        started:
+          type: boolean
+        message:
+          type: string
+        jobId:
+          type: string
+          nullable: true
+      required: [started, message]
+
+    IngestionStatus:
+      type: object
+      properties:
+        isRunning:
+          type: boolean
+        lastRunAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastRunItemsProcessed:
+          type: integer
+        lastRunErrors:
+          type: integer
+        queuedVendors:
+          type: integer
+      required: [isRunning, lastRunItemsProcessed, lastRunErrors, queuedVendors]
