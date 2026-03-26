@@ -15,6 +15,7 @@ router.get("/v1/updates", async (req, res) => {
       date_from,
       date_to,
       flagged,
+      highImpact,
     } = req.query as Record<string, string>;
 
     const limit = Math.min(Number(req.query.limit) || 20, 100);
@@ -73,6 +74,10 @@ router.get("/v1/updates", async (req, res) => {
 
     if (flagged !== undefined) {
       conditions.push(eq(updatesTable.flaggedForReview, flagged === "true"));
+    }
+
+    if (highImpact !== undefined) {
+      conditions.push(eq(updatesTable.highImpact, highImpact === "true"));
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;

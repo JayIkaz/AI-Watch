@@ -2,25 +2,28 @@ import { useState } from "react";
 import { useListUpdates, useListVendors, useListCategories } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
-import { Filter, X, Loader2, Database, CheckCircle2 } from "lucide-react";
+import { Filter, X, Loader2, Database, CheckCircle2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
 
 export default function Feed() {
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const limit = 20;
+  const { highImpactOnly, setHighImpactOnly } = useFeedPrefs();
 
   const { data: updatesData, isLoading: isLoadingUpdates } = useListUpdates(
     {
       vendor: selectedVendors.join(",") || undefined,
       category: selectedCategories.join(",") || undefined,
+      highImpact: highImpactOnly ? true : undefined,
       limit,
       offset: page * limit,
     },
     {
       query: {
-        queryKey: ["/api/v1/updates", selectedVendors.join(","), selectedCategories.join(","), page],
+        queryKey: ["/api/v1/updates", selectedVendors.join(","), selectedCategories.join(","), page, highImpactOnly],
       },
     }
   );
@@ -106,6 +109,23 @@ export default function Feed() {
             </div>
 
             <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Quick Filter</h3>
+                <button
+                  onClick={() => { setHighImpactOnly(!highImpactOnly); setPage(0); }}
+                  className={cn(
+                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all",
+                    highImpactOnly
+                      ? "bg-primary/10 border-primary/40 text-primary"
+                      : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-border/80"
+                  )}
+                >
+                  <Zap className={cn("w-4 h-4", highImpactOnly ? "text-primary" : "text-muted-foreground")} />
+                  High-Impact Only
+                  {highImpactOnly && <span className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                </button>
+              </div>
+
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Categories</h3>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-2">

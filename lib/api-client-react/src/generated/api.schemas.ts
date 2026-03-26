@@ -274,6 +274,10 @@ export type ListUpdatesParams = {
    * Filter by review flag status
    */
   flagged?: boolean;
+  /**
+   * Filter to only high-impact updates
+   */
+  highImpact?: boolean;
 };
 
 export type ListApiKeys200 = {

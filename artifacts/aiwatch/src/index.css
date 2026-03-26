@@ -25,7 +25,7 @@
   --color-ring: hsl(var(--ring));
 }
 
-:root {
+:root, .dark {
   /* Dark mode professional intelligence dashboard palette */
   --background: 226 25% 6%;
   --foreground: 210 40% 98%;
@@ -50,6 +50,32 @@
   
   --destructive: 350 80% 60%;
   --destructive-foreground: 210 40% 98%;
+}
+
+.light {
+  --background: 210 40% 98%;
+  --foreground: 226 25% 10%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 226 25% 10%;
+
+  --border: 220 20% 88%;
+  --ring: 183 70% 38%;
+
+  --primary: 183 70% 38%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 20% 94%;
+  --secondary-foreground: 226 25% 10%;
+
+  --muted: 220 20% 96%;
+  --muted-foreground: 215 14% 45%;
+
+  --accent: 280 60% 55%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 350 72% 52%;
+  --destructive-foreground: 0 0% 100%;
 }
 
 @layer base {

@@ -60,7 +60,7 @@ export function Layout({ children }: LayoutProps) {
               className="w-6 h-6 object-contain"
             />
           </div>
-          <span className="font-display font-bold text-xl tracking-tight text-glow text-white">
+          <span className="font-display font-bold text-xl tracking-tight text-glow text-foreground">
             AIWatch
           </span>
         </div>
