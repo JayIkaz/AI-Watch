@@ -7,11 +7,11 @@ import {
   Cpu, 
   LogOut, 
   Search,
-  Bell,
   RefreshCw,
   Newspaper
 } from "lucide-react";
 import { useGetMe, useGetIngestionStatus, useTriggerIngestion } from "@workspace/api-client-react";
+import { NotificationBell } from "./NotificationPanel";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -153,10 +153,7 @@ export function Layout({ children }: LayoutProps) {
       <main className="flex-1 relative overflow-y-auto h-screen bg-gradient-to-br from-background via-background to-secondary/20">
         {/* Subtle top blur effect for scrolling */}
         <div className="sticky top-0 z-10 h-16 w-full bg-background/60 backdrop-blur-xl border-b border-white/5 flex items-center justify-end px-6">
-           <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-white/5">
-             <Bell className="w-5 h-5" />
-             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(0,240,255,0.8)]" />
-           </button>
+          <NotificationBell />
         </div>
         <div className="p-4 md:p-8 max-w-7xl mx-auto">
           {children}
