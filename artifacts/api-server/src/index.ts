@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { autoSeed } from "./lib/seed";
 import { runFullIngestion } from "./routes/ingestion";
+import { runNewsIngestion } from "./routes/news";
 
 const rawPort = process.env["PORT"];
 
@@ -27,16 +28,26 @@ async function startupRoutine() {
 
   // Run initial ingestion after a short delay to let DB settle
   setTimeout(async () => {
-    logger.info("Starting scheduled ingestion run");
+    logger.info("Starting scheduled vendor ingestion run");
     await runFullIngestion().catch((err) => {
-      logger.warn({ err }, "Scheduled ingestion failed");
+      logger.warn({ err }, "Scheduled vendor ingestion failed");
+    });
+
+    logger.info("Starting scheduled news ingestion run");
+    await runNewsIngestion().catch((err) => {
+      logger.warn({ err }, "Scheduled news ingestion failed");
     });
 
     // Then run every 6 hours
     setInterval(async () => {
-      logger.info("Starting scheduled ingestion run");
+      logger.info("Starting scheduled vendor ingestion run");
       await runFullIngestion().catch((err) => {
-        logger.warn({ err }, "Scheduled ingestion failed");
+        logger.warn({ err }, "Scheduled vendor ingestion failed");
+      });
+
+      logger.info("Starting scheduled news ingestion run");
+      await runNewsIngestion().catch((err) => {
+        logger.warn({ err }, "Scheduled news ingestion failed");
       });
     }, INGESTION_INTERVAL_MS);
   }, STARTUP_DELAY_MS);

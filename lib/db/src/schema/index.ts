@@ -5,3 +5,5 @@ export * from "./updates";
 export * from "./userPreferences";
 export * from "./apiKeys";
 export * from "./ingestionSources";
+export * from "./newsItems";
+export * from "./newsSources";

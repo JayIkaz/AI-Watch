@@ -9,6 +9,7 @@ import Vendors from "./pages/Vendors";
 import VendorDetail from "./pages/VendorDetail";
 import Categories from "./pages/Categories";
 import Settings from "./pages/Settings";
+import News from "./pages/News";
 import Login from "./pages/Login";
 import NotFound from "./pages/not-found";
 
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/vendors" component={Vendors} />
       <Route path="/vendors/:slug" component={VendorDetail} />
       <Route path="/categories" component={Categories} />
+      <Route path="/news" component={News} />
       <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />

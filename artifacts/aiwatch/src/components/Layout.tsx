@@ -8,7 +8,8 @@ import {
   LogOut, 
   Search,
   Bell,
-  RefreshCw
+  RefreshCw,
+  Newspaper
 } from "lucide-react";
 import { useGetMe, useGetIngestionStatus, useTriggerIngestion } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ export function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { href: "/", label: "Intelligence Feed", icon: Activity },
+    { href: "/news", label: "News & Gossip", icon: Newspaper },
     { href: "/vendors", label: "Vendors", icon: Cpu },
     { href: "/categories", label: "Categories", icon: Layers },
     { href: "/settings", label: "Settings", icon: Settings },

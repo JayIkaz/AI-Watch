@@ -4,6 +4,8 @@ import {
   categoriesTable,
   ingestionSourcesTable,
   updatesTable,
+  newsSourcesTable,
+  newsItemsTable,
 } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 
@@ -53,59 +55,168 @@ const sampleUpdates = [
   { vendorSlug: "azure-ai", categorySlug: "pricing", title: "Azure OpenAI Service Introduces Provisioned Throughput Units", summary: "Microsoft introduced Provisioned Throughput Units (PTUs) for Azure OpenAI Service, allowing enterprises to reserve guaranteed inference capacity. PTUs provide predictable latency and throughput for production workloads. Pricing is available through enterprise agreements starting at $2 per PTU per hour.", whyItMatters: null, sourceUrl: "https://azure.microsoft.com/blog/azure-openai-ptu", publishedAt: new Date("2024-11-20"), confidenceScore: 0.88, highImpact: false, flaggedForReview: false },
 ];
 
+const newsSources = [
+  { name: "TechCrunch AI", url: "https://techcrunch.com/feed/", sourceType: "major-outlet" as const, defaultCredibility: "verified" as const },
+  { name: "The Verge AI", url: "https://www.theverge.com/rss/index.xml", sourceType: "major-outlet" as const, defaultCredibility: "verified" as const },
+  { name: "Ars Technica", url: "https://feeds.arstechnica.com/arstechnica/technology-lab", sourceType: "major-outlet" as const, defaultCredibility: "verified" as const },
+  { name: "VentureBeat AI", url: "https://venturebeat.com/ai/feed/", sourceType: "tech-blog" as const, defaultCredibility: "likely" as const },
+  { name: "MIT Technology Review", url: "https://www.technologyreview.com/feed/", sourceType: "major-outlet" as const, defaultCredibility: "verified" as const },
+  { name: "Wired", url: "https://www.wired.com/feed/rss", sourceType: "major-outlet" as const, defaultCredibility: "verified" as const },
+  { name: "AI News", url: "https://www.artificialintelligence-news.com/feed/", sourceType: "tech-blog" as const, defaultCredibility: "likely" as const },
+  { name: "Import AI Newsletter", url: "https://jack-clark.net/feed/", sourceType: "newsletter" as const, defaultCredibility: "likely" as const },
+];
+
+const sampleNewsItems = [
+  {
+    title: "OpenAI in Advanced Talks to Raise $40B at $340B Valuation",
+    summary: "OpenAI is reportedly in advanced discussions to raise $40 billion in new funding from SoftBank and other investors, which would value the company at $340 billion — making it one of the most valuable private companies in history. The round would dwarf previous funding rounds and fuel the company's compute buildout.",
+    sourceName: "The Verge",
+    sourceUrl: "https://www.theverge.com/2024/2/openai-funding",
+    sourceType: "major-outlet" as const,
+    credibilityRating: "verified" as const,
+    credibilityReason: "Reported by The Verge citing multiple named sources, subsequently confirmed by official statements.",
+    mentionedVendors: ["OpenAI"],
+    publishedAt: new Date("2025-02-01"),
+    highInterest: true,
+  },
+  {
+    title: "Leaked: Anthropic's Project Aria Internal Roadmap Shows GPT-5 Rival Due Q3",
+    summary: "A purported internal document from Anthropic, shared by an anonymous X account, claims the company's next frontier model internally codenamed 'Aria' will launch in Q3 with capabilities exceeding GPT-5. The document has not been verified and Anthropic has not commented.",
+    sourceName: "X / Twitter",
+    sourceUrl: "https://x.com/aiinsider/status/example",
+    sourceType: "social" as const,
+    credibilityRating: "gossip" as const,
+    credibilityReason: "Anonymous X account sharing unverified internal documents — no corroborating sources.",
+    mentionedVendors: ["Anthropic", "OpenAI"],
+    publishedAt: new Date("2025-03-10"),
+    highInterest: false,
+  },
+  {
+    title: "Google DeepMind Acquires AI Safety Startup Ought for Reported $200M",
+    summary: "Google DeepMind has quietly acquired Ought, the AI safety research organization behind the Elicit research assistant, for a reported $200 million. The acquisition signals DeepMind's deepening focus on interpretability and scalable oversight research as models grow more capable.",
+    sourceName: "MIT Technology Review",
+    sourceUrl: "https://www.technologyreview.com/2025/03/google-deepmind-ought",
+    sourceType: "major-outlet" as const,
+    credibilityRating: "verified" as const,
+    credibilityReason: "MIT Technology Review citing named sources with confirmation from both companies.",
+    mentionedVendors: ["Google DeepMind"],
+    publishedAt: new Date("2025-03-05"),
+    highInterest: true,
+  },
+  {
+    title: "Sam Altman Reportedly Considering $7 Trillion Chip Venture",
+    summary: "According to reports from multiple outlets, OpenAI CEO Sam Altman has been in discussions with global investors and governments about a venture that could raise as much as $7 trillion to build AI chip infrastructure. The project would aim to dramatically increase global chip production capacity.",
+    sourceName: "Wired",
+    sourceUrl: "https://www.wired.com/story/sam-altman-chips-trillion",
+    sourceType: "major-outlet" as const,
+    credibilityRating: "likely" as const,
+    credibilityReason: "Reported by Wired with sourcing from multiple tech journalists, though exact figures remain disputed.",
+    mentionedVendors: ["OpenAI"],
+    publishedAt: new Date("2025-01-25"),
+    highInterest: true,
+  },
+  {
+    title: "Hacker News Thread: Is DeepSeek Actually Distilled from GPT-4?",
+    summary: "A popular Hacker News discussion is speculating that DeepSeek's impressive performance may partly be due to distillation from OpenAI's GPT-4, citing pattern similarities in model outputs. OpenAI has not commented on the claims, which remain unverified.",
+    sourceName: "Hacker News",
+    sourceUrl: "https://news.ycombinator.com/item?id=example",
+    sourceType: "forum" as const,
+    credibilityRating: "gossip" as const,
+    credibilityReason: "Community speculation on a forum with no primary sources or independent verification.",
+    mentionedVendors: ["DeepSeek", "OpenAI"],
+    publishedAt: new Date("2025-02-10"),
+    highInterest: false,
+  },
+  {
+    title: "EU AI Act Enforcement Begins: What It Means for US AI Companies",
+    summary: "The European Union has begun enforcement of the AI Act, requiring AI systems classified as high-risk to comply with transparency and documentation requirements. US-based AI companies including OpenAI, Anthropic, and Google must now demonstrate compliance or face fines of up to 3% of global annual revenue.",
+    sourceName: "Ars Technica",
+    sourceUrl: "https://arstechnica.com/tech-policy/eu-ai-act-enforcement",
+    sourceType: "major-outlet" as const,
+    credibilityRating: "verified" as const,
+    credibilityReason: "Ars Technica reporting on official EU regulatory enforcement with links to primary regulatory documents.",
+    mentionedVendors: ["OpenAI", "Anthropic", "Google DeepMind"],
+    publishedAt: new Date("2025-03-01"),
+    highInterest: true,
+  },
+];
+
 export async function autoSeed(log: (msg: string) => void): Promise<void> {
   const [{ vendorCount }] = await db
     .select({ vendorCount: count() })
     .from(vendorsTable);
 
-  if (vendorCount > 0) {
-    return;
-  }
+  if (vendorCount === 0) {
+    log("Auto-seeding database with initial data...");
 
-  log("Auto-seeding database with initial data...");
+    for (const cat of categories) {
+      await db.insert(categoriesTable).values(cat).onConflictDoNothing();
+    }
 
-  for (const cat of categories) {
-    await db.insert(categoriesTable).values(cat).onConflictDoNothing();
-  }
+    for (const v of vendors) {
+      const { sources, ...vendorData } = v;
+      const [vendor] = await db
+        .insert(vendorsTable)
+        .values(vendorData)
+        .onConflictDoNothing()
+        .returning();
 
-  for (const v of vendors) {
-    const { sources, ...vendorData } = v;
-    const [vendor] = await db
-      .insert(vendorsTable)
-      .values(vendorData)
-      .onConflictDoNothing()
-      .returning();
+      const vendorId = vendor?.id ?? (
+        await db.select().from(vendorsTable).where(eq(vendorsTable.slug, v.slug))
+      )[0]?.id;
 
-    const vendorId = vendor?.id ?? (
-      await db.select().from(vendorsTable).where(eq(vendorsTable.slug, v.slug))
-    )[0]?.id;
-
-    if (vendorId) {
-      for (const src of sources) {
-        await db
-          .insert(ingestionSourcesTable)
-          .values({ vendorId, ...src })
-          .onConflictDoNothing();
+      if (vendorId) {
+        for (const src of sources) {
+          await db
+            .insert(ingestionSourcesTable)
+            .values({ vendorId, ...src })
+            .onConflictDoNothing();
+        }
       }
     }
+
+    for (const u of sampleUpdates) {
+      const { vendorSlug, categorySlug, ...updateData } = u;
+      const [vendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.slug, vendorSlug));
+      const [category] = await db.select().from(categoriesTable).where(eq(categoriesTable.slug, categorySlug));
+      if (!vendor || !category) continue;
+
+      await db
+        .insert(updatesTable)
+        .values({
+          ...updateData,
+          vendorId: vendor.id,
+          categoryId: category.id,
+          deduplicationHash: `seed:${vendorSlug}:${updateData.title.substring(0, 50)}`,
+        })
+        .onConflictDoNothing();
+    }
+
+    log("Seeded: 18 vendors, 6 categories, 13 sample updates.");
   }
 
-  for (const u of sampleUpdates) {
-    const { vendorSlug, categorySlug, ...updateData } = u;
-    const [vendor] = await db.select().from(vendorsTable).where(eq(vendorsTable.slug, vendorSlug));
-    const [category] = await db.select().from(categoriesTable).where(eq(categoriesTable.slug, categorySlug));
-    if (!vendor || !category) continue;
+  // Always ensure news sources and sample items are seeded (independent of vendor seed)
+  const [{ newsSourceCount }] = await db
+    .select({ newsSourceCount: count() })
+    .from(newsSourcesTable);
 
-    await db
-      .insert(updatesTable)
-      .values({
-        ...updateData,
-        vendorId: vendor.id,
-        categoryId: category.id,
-        deduplicationHash: `seed:${vendorSlug}:${updateData.title.substring(0, 50)}`,
-      })
-      .onConflictDoNothing();
+  if (newsSourceCount === 0) {
+    log("Seeding news sources and sample news items...");
+
+    for (const src of newsSources) {
+      await db.insert(newsSourcesTable).values(src).onConflictDoNothing();
+    }
+
+    for (const item of sampleNewsItems) {
+      await db
+        .insert(newsItemsTable)
+        .values({
+          ...item,
+          deduplicationHash: `seed:news:${item.title.substring(0, 60)}`,
+        })
+        .onConflictDoNothing();
+    }
+
+    log("Seeded: 8 news sources, 6 sample news items.");
   }
-
-  log("Auto-seed complete: 18 vendors, 6 categories, 13 sample updates.");
 }

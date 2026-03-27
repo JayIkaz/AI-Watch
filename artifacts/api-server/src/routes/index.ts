@@ -7,6 +7,7 @@ import updatesRouter from "./updates";
 import usersRouter from "./users";
 import apiKeysRouter from "./apikeys";
 import ingestionRouter from "./ingestion";
+import newsRouter from "./news";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(updatesRouter);
 router.use(usersRouter);
 router.use(apiKeysRouter);
 router.use(ingestionRouter);
+router.use(newsRouter);
 
 export default router;

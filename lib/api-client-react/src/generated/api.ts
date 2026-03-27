@@ -1271,3 +1271,79 @@ export function useGetIngestionStatus<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+// ─── News ──────────────────────────────────────────────────────────────────
+
+export const getListNewsUrl = (params?: import("./api.schemas").ListNewsParams) => {
+  const normalizedParams = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) normalizedParams.append(key, value === null ? "null" : value.toString());
+  });
+  const s = normalizedParams.toString();
+  return s.length > 0 ? `/api/v1/news?${s}` : `/api/v1/news`;
+};
+
+export const listNews = async (
+  params?: import("./api.schemas").ListNewsParams,
+  options?: RequestInit,
+): Promise<import("./api.schemas").NewsResponse> => {
+  return customFetch<import("./api.schemas").NewsResponse>(getListNewsUrl(params), { ...options, method: "GET" });
+};
+
+export const getListNewsQueryKey = (params?: import("./api.schemas").ListNewsParams) =>
+  [`/api/v1/news`, ...(params ? [params] : [])] as const;
+
+export function useListNews<
+  TData = Awaited<ReturnType<typeof listNews>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: import("./api.schemas").ListNewsParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listNews>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getListNewsQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listNews>>> = ({ signal }) =>
+    listNews(params, { signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
+}
+
+export const triggerNewsIngestion = async (options?: RequestInit): Promise<import("./api.schemas").TriggerNewsIngestion200> => {
+  return customFetch<import("./api.schemas").TriggerNewsIngestion200>(`/api/v1/news/trigger`, { ...options, method: "POST" });
+};
+
+export function useTriggerNewsIngestion<TError = ErrorType<unknown>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof triggerNewsIngestion>>, TError, void, TContext>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseMutationResult<Awaited<ReturnType<typeof triggerNewsIngestion>>, TError, void, TContext> {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof triggerNewsIngestion>>, void> = () =>
+    triggerNewsIngestion(requestOptions);
+  return useMutation({ mutationFn, ...mutationOptions });
+}
+
+export const getNewsStatus = async (options?: RequestInit): Promise<import("./api.schemas").NewsIngestionStatus> => {
+  return customFetch<import("./api.schemas").NewsIngestionStatus>(`/api/v1/news/status`, { ...options, method: "GET" });
+};
+
+export const getGetNewsStatusQueryKey = () => [`/api/v1/news/status`] as const;
+
+export function useGetNewsStatus<
+  TData = Awaited<ReturnType<typeof getNewsStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getNewsStatus>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetNewsStatusQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getNewsStatus>>> = ({ signal }) =>
+    getNewsStatus({ signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
+}

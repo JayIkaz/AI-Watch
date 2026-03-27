@@ -283,3 +283,47 @@ export type ListUpdatesParams = {
 export type ListApiKeys200 = {
   keys: ApiKeyInfo[];
 };
+
+export type NewsCredibility = "verified" | "likely" | "unverified" | "gossip";
+export type NewsSourceType = "major-outlet" | "tech-blog" | "newsletter" | "social" | "forum";
+
+export type NewsItem = {
+  id: number;
+  title: string;
+  summary: string | null;
+  rawContent: string | null;
+  sourceUrl: string | null;
+  sourceName: string;
+  sourceType: NewsSourceType;
+  credibilityRating: NewsCredibility;
+  credibilityReason: string | null;
+  mentionedVendors: string[];
+  publishedAt: string | null;
+  detectedAt: string;
+  highInterest: boolean;
+  deduplicationHash: string | null;
+};
+
+export type NewsResponse = {
+  news: NewsItem[];
+  total: number;
+};
+
+export type ListNewsParams = {
+  credibility?: string;
+  vendor?: string;
+  highInterest?: boolean;
+  limit?: number;
+  offset?: number;
+};
+
+export type TriggerNewsIngestion200 = {
+  started: boolean;
+  message: string;
+};
+
+export type NewsIngestionStatus = {
+  isRunning: boolean;
+  lastRunAt: string | null;
+  totalItems: number;
+};
