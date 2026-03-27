@@ -228,7 +228,7 @@ export default function News() {
 
         {/* Sidebar */}
         <div className="w-full lg:w-72 shrink-0">
-          <div className="sticky top-24 space-y-4">
+          <div className="sticky top-6 max-h-[calc(100vh-5rem)] overflow-y-auto space-y-4 pr-1">
 
             {/* Scan status + trigger */}
             <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-4 shadow-lg">

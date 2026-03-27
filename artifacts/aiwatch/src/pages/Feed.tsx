@@ -94,8 +94,9 @@ export default function Feed() {
 
         {/* Filters Sidebar */}
         <div className="w-full lg:w-72 shrink-0">
-          <div className="sticky top-24 bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-lg">
-            <div className="flex items-center gap-2 mb-6 text-foreground font-display font-bold">
+          <div className="sticky top-6 flex flex-col max-h-[calc(100vh-5rem)] bg-card/50 backdrop-blur-sm border border-border rounded-2xl shadow-lg overflow-hidden">
+            {/* Pinned header */}
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-border/60 text-foreground font-display font-bold shrink-0">
               <Filter className="w-4 h-4 text-primary" />
               Filters
               {(selectedVendors.length > 0 || selectedCategories.length > 0) && (
@@ -108,7 +109,8 @@ export default function Feed() {
               )}
             </div>
 
-            <div className="space-y-6">
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-6">
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Quick Filter</h3>
                 <button
@@ -128,7 +130,7 @@ export default function Feed() {
 
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Categories</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                <div className="space-y-2">
                   {categoriesData?.categories.map(cat => (
                     <label key={cat.id} onClick={() => toggleCategory(cat.slug)} className="flex items-center gap-3 group cursor-pointer">
                       <div className={cn(
@@ -147,7 +149,7 @@ export default function Feed() {
 
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Vendors</h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                <div className="space-y-2">
                   {vendorsData?.vendors.map(vendor => (
                     <label key={vendor.id} onClick={() => toggleVendor(vendor.slug)} className="flex items-center gap-3 group cursor-pointer">
                       <div className={cn(
