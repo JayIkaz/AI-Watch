@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, userLikesTable, updatesTable, vendorsTable, categoriesTable, newsItemsTable, newsSourcesTable } from "@workspace/db";
+import { db, userLikesTable, updatesTable, vendorsTable, categoriesTable, newsItemsTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
 
@@ -54,12 +54,8 @@ router.get("/v1/likes/items", requireAuth, async (req: any, res) => {
         : Promise.resolve([]),
       newsIds.length > 0
         ? db
-            .select({
-              item: newsItemsTable,
-              source: newsSourcesTable,
-            })
+            .select({ item: newsItemsTable })
             .from(newsItemsTable)
-            .leftJoin(newsSourcesTable, eq(newsItemsTable.sourceId, newsSourcesTable.id))
             .where(inArray(newsItemsTable.id, newsIds))
         : Promise.resolve([]),
     ]);
@@ -100,8 +96,8 @@ router.get("/v1/likes/items", requireAuth, async (req: any, res) => {
       credibilityReason: row.item.credibilityReason,
       highInterest: row.item.highInterest,
       mentionedVendors: row.item.mentionedVendors,
-      sourceName: row.source?.name ?? "Unknown",
-      sourceType: row.source?.sourceType ?? "unknown",
+      sourceName: row.item.sourceName,
+      sourceType: row.item.sourceType,
     }));
 
     res.json({ updates: likedUpdates, news: likedNews });
