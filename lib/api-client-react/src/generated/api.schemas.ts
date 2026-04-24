@@ -327,3 +327,47 @@ export type NewsIngestionStatus = {
   lastRunAt: string | null;
   totalItems: number;
 };
+
+export type LikeIds = {
+  updateIds: number[];
+  newsIds: number[];
+};
+
+export type LikedUpdate = {
+  id: number;
+  title: string;
+  summary: string | null;
+  sourceUrl: string | null;
+  publishedAt: string | null;
+  detectedAt: string;
+  highImpact: boolean;
+  whyItMatters: string | null;
+  confidenceScore: number | null;
+  flaggedForReview: boolean;
+  vendor: { id: number; name: string; slug: string; logoUrl: string | null } | null;
+  category: { id: number; name: string; slug: string; color: string | null } | null;
+};
+
+export type LikedNews = {
+  id: number;
+  title: string;
+  summary: string | null;
+  sourceUrl: string | null;
+  publishedAt: string | null;
+  detectedAt: string;
+  credibilityRating: NewsCredibility;
+  credibilityReason: string | null;
+  highInterest: boolean;
+  mentionedVendors: string[] | null;
+  sourceName: string;
+  sourceType: string;
+};
+
+export type LikedItems = {
+  updates: LikedUpdate[];
+  news: LikedNews[];
+};
+
+export type LikeResponse = {
+  liked: boolean;
+};

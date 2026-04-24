@@ -4,12 +4,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { FeedPrefsProvider } from "@/contexts/FeedPrefsContext";
+import { LikesProvider } from "@/contexts/LikesContext";
 import Feed from "./pages/Feed";
 import Vendors from "./pages/Vendors";
 import VendorDetail from "./pages/VendorDetail";
 import Categories from "./pages/Categories";
 import Settings from "./pages/Settings";
 import News from "./pages/News";
+import Liked from "./pages/Liked";
 import Login from "./pages/Login";
 import NotFound from "./pages/not-found";
 
@@ -31,6 +33,7 @@ function Router() {
       <Route path="/vendors/:slug" component={VendorDetail} />
       <Route path="/categories" component={Categories} />
       <Route path="/news" component={News} />
+      <Route path="/liked" component={Liked} />
       <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
@@ -43,12 +46,14 @@ function App() {
     <ThemeProvider>
       <FeedPrefsProvider>
         <QueryClientProvider client={queryClient}>
+          <LikesProvider>
           <TooltipProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <Router />
             </WouterRouter>
             <Toaster />
           </TooltipProvider>
+          </LikesProvider>
         </QueryClientProvider>
       </FeedPrefsProvider>
     </ThemeProvider>

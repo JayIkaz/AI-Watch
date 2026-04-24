@@ -8,7 +8,8 @@ import {
   LogOut, 
   Search,
   RefreshCw,
-  Newspaper
+  Newspaper,
+  Heart
 } from "lucide-react";
 import { useGetMe, useGetIngestionStatus, useTriggerIngestion } from "@workspace/api-client-react";
 import { NotificationBell } from "./NotificationPanel";
@@ -32,6 +33,7 @@ export function Layout({ children }: LayoutProps) {
   const navItems = [
     { href: "/", label: "Intelligence Feed", icon: Activity },
     { href: "/news", label: "News & Gossip", icon: Newspaper },
+    { href: "/liked", label: "Saved", icon: Heart },
     { href: "/vendors", label: "Vendors", icon: Cpu },
     { href: "/categories", label: "Categories", icon: Layers },
     { href: "/settings", label: "Settings", icon: Settings },

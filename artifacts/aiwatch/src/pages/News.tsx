@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useListNews, useTriggerNewsIngestion, useGetNewsStatus, type NewsItem, type NewsCredibility } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
-import { ExternalLink, Loader2, Newspaper, RefreshCw, AlertTriangle, CheckCircle, HelpCircle, MessageCircle, Zap, Building2 } from "lucide-react";
+import { useLikes } from "@/contexts/LikesContext";
+import { ExternalLink, Loader2, Newspaper, RefreshCw, CheckCircle, HelpCircle, MessageCircle, Zap, Building2, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +69,8 @@ function CredibilityBadge({ rating }: { rating: NewsCredibility }) {
 
 function NewsCard({ item }: { item: NewsItem }) {
   const cfg = CREDIBILITY_CONFIG[item.credibilityRating];
+  const { isLiked, toggle } = useLikes();
+  const liked = isLiked("news", item.id);
   return (
     <div className={cn(
       "group relative flex flex-col bg-card rounded-2xl border border-border p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5",
@@ -85,11 +88,25 @@ function NewsCard({ item }: { item: NewsItem }) {
             </span>
           )}
         </div>
-        <span className="text-xs text-muted-foreground shrink-0" title={new Date(item.detectedAt).toLocaleString()}>
-          {item.publishedAt
-            ? formatDistanceToNow(new Date(item.publishedAt), { addSuffix: true })
-            : formatDistanceToNow(new Date(item.detectedAt), { addSuffix: true })}
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-muted-foreground" title={new Date(item.detectedAt).toLocaleString()}>
+            {item.publishedAt
+              ? formatDistanceToNow(new Date(item.publishedAt), { addSuffix: true })
+              : formatDistanceToNow(new Date(item.detectedAt), { addSuffix: true })}
+          </span>
+          <button
+            onClick={() => toggle("news", item.id)}
+            className={cn(
+              "p-1.5 rounded-lg transition-all duration-200",
+              liked
+                ? "text-rose-400 hover:text-rose-300"
+                : "text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10"
+            )}
+            title={liked ? "Remove from Saved" : "Save for later"}
+          >
+            <Heart className={cn("w-4 h-4 transition-transform", liked && "fill-current scale-110")} />
+          </button>
+        </div>
       </div>
 
       <h3 className="text-base md:text-lg font-display font-bold text-foreground mb-2 leading-snug group-hover:text-primary transition-colors">

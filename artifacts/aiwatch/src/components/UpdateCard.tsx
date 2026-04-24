@@ -1,9 +1,10 @@
 import { Update } from "@workspace/api-client-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
-import { ExternalLink, ShieldAlert, Cpu, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ExternalLink, ShieldAlert, Cpu, CheckCircle2, AlertTriangle, Heart } from "lucide-react";
 import { cn, getCategoryColor } from "@/lib/utils";
 import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
+import { useLikes } from "@/contexts/LikesContext";
 
 interface UpdateCardProps {
   update: Update;
@@ -12,6 +13,8 @@ interface UpdateCardProps {
 export function UpdateCard({ update }: UpdateCardProps) {
   const { density } = useFeedPrefs();
   const compact = density === "compact";
+  const { isLiked, toggle } = useLikes();
+  const liked = isLiked("update", update.id);
 
   return (
     <div className={cn(
@@ -97,17 +100,31 @@ export function UpdateCard({ update }: UpdateCardProps) {
             </div>
           )}
         </div>
-        {update.sourceUrl && (
-          <a
-            href={update.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors bg-secondary px-3 py-1.5 rounded-lg border border-transparent hover:border-primary/20"
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => toggle("update", update.id)}
+            className={cn(
+              "p-1.5 rounded-lg transition-all duration-200",
+              liked
+                ? "text-rose-400 hover:text-rose-300"
+                : "text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10"
+            )}
+            title={liked ? "Remove from Saved" : "Save for later"}
           >
-            Source
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        )}
+            <Heart className={cn("w-4 h-4 transition-transform", liked && "fill-current scale-110")} />
+          </button>
+          {update.sourceUrl && (
+            <a
+              href={update.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors bg-secondary px-3 py-1.5 rounded-lg border border-transparent hover:border-primary/20"
+            >
+              Source
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
