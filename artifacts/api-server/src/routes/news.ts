@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, newsItemsTable, newsSourcesTable } from "@workspace/db";
-import { desc, eq, and, or, SQL } from "drizzle-orm";
+import { desc, eq, and, or, ilike, SQL } from "drizzle-orm";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import crypto from "crypto";
 
@@ -191,7 +191,7 @@ async function runNewsIngestion() {
 
 router.get("/v1/news", async (req, res) => {
   try {
-    const { credibility, vendor, highInterest } = req.query as Record<string, string>;
+    const { credibility, vendor, highInterest, keyword } = req.query as Record<string, string>;
     const limit = Math.min(Number(req.query.limit) || 20, 100);
     const offset = Number(req.query.offset) || 0;
 
@@ -213,6 +213,17 @@ router.get("/v1/news", async (req, res) => {
 
     if (highInterest !== undefined) {
       conditions.push(eq(newsItemsTable.highInterest, highInterest === "true"));
+    }
+
+    if (keyword) {
+      const term = `%${keyword}%`;
+      conditions.push(
+        or(
+          ilike(newsItemsTable.title, term),
+          ilike(newsItemsTable.summary, term),
+          ilike(newsItemsTable.sourceName, term),
+        )!
+      );
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;

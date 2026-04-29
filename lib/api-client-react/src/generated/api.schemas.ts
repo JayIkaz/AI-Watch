@@ -313,6 +313,7 @@ export type ListNewsParams = {
   credibility?: string;
   vendor?: string;
   highInterest?: boolean;
+  keyword?: string;
   limit?: number;
   offset?: number;
 };

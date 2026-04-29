@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useSearchParams } from "wouter";
 import { useListNews, useTriggerNewsIngestion, useGetNewsStatus, type NewsItem, type NewsCredibility } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { useLikes } from "@/contexts/LikesContext";
-import { ExternalLink, Loader2, Newspaper, RefreshCw, CheckCircle, HelpCircle, MessageCircle, Zap, Building2, Heart } from "lucide-react";
+import { ExternalLink, Loader2, Newspaper, RefreshCw, CheckCircle, HelpCircle, MessageCircle, Zap, Building2, Heart, Search } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -166,17 +167,20 @@ export default function News() {
   const [highInterestOnly, setHighInterestOnly] = useState(false);
   const [page, setPage] = useState(0);
   const limit = 20;
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") ?? undefined;
 
   const { data, isLoading } = useListNews(
     {
       credibility: selectedRatings.length > 0 ? selectedRatings.join(",") : undefined,
       highInterest: highInterestOnly ? true : undefined,
+      keyword: searchQuery,
       limit,
       offset: page * limit,
     },
     {
       query: {
-        queryKey: ["/api/v1/news", selectedRatings.join(","), highInterestOnly, page],
+        queryKey: ["/api/v1/news", selectedRatings.join(","), highInterestOnly, page, searchQuery],
         refetchInterval: 30000,
       },
     }
@@ -205,6 +209,13 @@ export default function News() {
               AI industry news from major outlets, tech blogs, social media, and community sources — rated from Verified to Gossip by Claude.
             </p>
           </div>
+
+          {searchQuery && (
+            <div className="mb-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm text-primary">
+              <Search className="w-4 h-4 shrink-0" />
+              <span>Results for <span className="font-semibold">"{searchQuery}"</span></span>
+            </div>
+          )}
 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">

@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useListUpdates, useListVendors, useListCategories } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
-import { Filter, X, Loader2, Database, CheckCircle2, Zap } from "lucide-react";
+import { Filter, X, Loader2, Database, CheckCircle2, Zap, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
+import { useSearchParams } from "wouter";
 
 export default function Feed() {
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
@@ -12,18 +13,21 @@ export default function Feed() {
   const [page, setPage] = useState(0);
   const limit = 20;
   const { highImpactOnly, setHighImpactOnly } = useFeedPrefs();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") ?? undefined;
 
   const { data: updatesData, isLoading: isLoadingUpdates } = useListUpdates(
     {
       vendor: selectedVendors.join(",") || undefined,
       category: selectedCategories.join(",") || undefined,
       highImpact: highImpactOnly ? true : undefined,
+      keyword: searchQuery,
       limit,
       offset: page * limit,
     },
     {
       query: {
-        queryKey: ["/api/v1/updates", selectedVendors.join(","), selectedCategories.join(","), page, highImpactOnly],
+        queryKey: ["/api/v1/updates", selectedVendors.join(","), selectedCategories.join(","), page, highImpactOnly, searchQuery],
       },
     }
   );
@@ -51,6 +55,13 @@ export default function Feed() {
             <h1 className="text-3xl font-display font-bold text-foreground mb-2">Intelligence Feed</h1>
             <p className="text-muted-foreground">The latest AI model releases, API changes, and pricing updates.</p>
           </div>
+
+          {searchQuery && (
+            <div className="mb-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm text-primary">
+              <Search className="w-4 h-4 shrink-0" />
+              <span>Results for <span className="font-semibold">"{searchQuery}"</span></span>
+            </div>
+          )}
 
           {isLoadingUpdates ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
