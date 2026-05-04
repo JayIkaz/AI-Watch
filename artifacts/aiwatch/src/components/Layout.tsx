@@ -114,13 +114,18 @@ export function Layout({ children }: LayoutProps) {
           <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-[0_0_15px_rgba(0,240,255,0.15)]">
             <img 
               src={`${import.meta.env.BASE_URL}images/logo.png`} 
-              alt="AIWatch" 
+              alt="Aukizan" 
               className="w-6 h-6 object-contain"
             />
           </div>
-          <span className="font-display font-bold text-xl tracking-tight text-glow text-foreground">
-            AIWatch
-          </span>
+          <div className="flex flex-col min-w-0">
+            <span className="font-display font-bold text-xl tracking-tight text-glow text-foreground leading-tight">
+              Aukizan
+            </span>
+            <span className="text-[10px] text-muted-foreground/70 leading-tight truncate">
+              AI signal, ranked by credibility
+            </span>
+          </div>
         </div>
 
         <div className="px-4 pb-4">

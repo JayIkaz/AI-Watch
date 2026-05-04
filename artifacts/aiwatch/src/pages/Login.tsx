@@ -20,14 +20,17 @@ export default function Login() {
             <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 shadow-[0_0_30px_rgba(0,240,255,0.2)] mb-6">
               <img 
                 src={`${import.meta.env.BASE_URL}images/logo.png`} 
-                alt="AIWatch Logo" 
+                alt="Aukizan Logo" 
                 className="w-12 h-12 object-contain"
               />
             </div>
-            <h1 className="text-3xl font-display font-bold text-white tracking-tight mb-3">
-              AIWatch
+            <h1 className="text-3xl font-display font-bold text-white tracking-tight mb-2">
+              Aukizan
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-primary/80 text-sm font-medium tracking-wide mb-2">
+              AI signal, ranked by credibility
+            </p>
+            <p className="text-muted-foreground text-sm">
               Unified intelligence feed for the AI industry. Track models, pricing, and API changes.
             </p>
           </div>

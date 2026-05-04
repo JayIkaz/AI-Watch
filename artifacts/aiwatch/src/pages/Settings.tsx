@@ -107,7 +107,7 @@ export default function Settings() {
           {/* Theme */}
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-lg">
             <h2 className="text-lg font-display font-bold text-foreground mb-1">Theme</h2>
-            <p className="text-sm text-muted-foreground mb-6">Choose how AIWatch looks on your device.</p>
+            <p className="text-sm text-muted-foreground mb-6">Choose how Aukizan looks on your device.</p>
             <div className="grid grid-cols-3 gap-3">
               {([
                 { value: "dark",   label: "Dark",   icon: Moon },
