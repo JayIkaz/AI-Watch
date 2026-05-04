@@ -1,0 +1,333 @@
+Improve the existing AIWatch “News & Gossip” page. Do not rebuild the app from scratch. Keep the current clean dashboard layout, sidebar, feed cards, right filter panel, and visual style. Make focused UI/content improvements so the page feels more like an AI signal-verification desk rather than a basic news list.
+
+Main goal:
+For each news/gossip item, help the user quickly understand:
+- what happened
+- how credible it is
+- how important it is
+- why it matters
+- what action to take
+- what sources support the rating
+
+Do not over-engineer the backend. Use existing data where available. Where data does not exist, use sensible mock/local values without breaking the app.
+
+1. Update the page subtitle
+
+Current copy mentions something like:
+“rated from Verified to Gossip by Claude”
+
+Replace this with model-neutral copy.
+
+Use:
+“AI industry news from major outlets, tech blogs, social media, and community sources — rated by source quality, corroboration, and confidence.”
+
+Do not mention Claude or any specific AI model in the UI copy.
+
+2. Rename credibility labels
+
+Update the credibility/rating labels across the page.
+
+Use these labels:
+
+- Verified
+- Credible
+- Unverified
+- Chatter
+
+Replace:
+- “Likely True” with “Credible”
+- “Gossip” with “Chatter”
+
+Keep “Verified” and “Unverified”.
+
+Where descriptions exist, use:
+
+Verified:
+“Confirmed by official or highly reliable sources.”
+
+Credible:
+“Reported by reputable sources but not fully confirmed from primary evidence.”
+
+Unverified:
+“Plausible, but not independently confirmed.”
+
+Chatter:
+“Social media, anonymous, or weakly sourced claims.”
+
+3. Separate credibility from impact
+
+Each card should show both:
+- Credibility
+- Impact
+
+Do not treat credibility and importance as the same thing.
+
+Add an impact badge to every card using one of:
+
+- High impact
+- Medium impact
+- Low impact
+
+Example badge combinations:
+- Verified · High impact
+- Credible · Medium impact
+- Chatter · Low impact
+
+Use existing logic if available. If not, create simple local/mock logic based on keywords, category, or source.
+
+4. Improve every news card structure
+
+Update each card to use this structure:
+
+- Credibility badge
+- Impact badge
+- Topic/source-type badge where available
+- Time posted
+- Headline
+- What happened
+- Why it matters
+- Confidence
+- Recommended action
+- Source details
+- Action buttons
+
+Each card should include the following sections:
+
+A. What happened
+One short factual sentence summarising the item.
+
+B. Why it matters
+One short practical explanation of the business/product/developer/market relevance.
+
+C. Confidence
+Explain why the item received its credibility rating.
+
+Example:
+“Credible — reported by MIT Technology Review, but not independently confirmed from a primary source.”
+
+D. Recommended action
+Use one of:
+- Monitor
+- Investigate
+- Share with team
+- Add to watchlist
+- Ignore
+- Create alert
+
+5. Add a compact “Signal summary” to every card
+
+Each card should include a small summary row or compact box like this:
+
+Signal summary:
+Credibility: Credible
+Impact: Medium
+Interest: High
+Action: Monitor
+
+This should be visually compact and easy to scan.
+
+6. Add “Why high interest” or “Matched because”
+
+Where a card is marked as High Interest, add a short reason.
+
+Use either:
+
+“Why high interest: Mentions AI agents, healthcare, enterprise automation, or major vendor activity.”
+
+Or:
+
+“Matched because: Topic, sector, source quality, and impact level match your watchlist.”
+
+Use available metadata where possible. If not available, use simple mock text based on the item’s category/source.
+
+7. Improve the right-side filter panel
+
+Keep the existing filter panel, but add better filter groups.
+
+Add these filter sections:
+
+A. Credibility
+- Verified
+- Credible
+- Unverified
+- Chatter
+
+B. Impact
+- High impact
+- Medium impact
+- Low impact
+
+C. Source type
+- Major outlet
+- Vendor blog
+- Research paper
+- Newsletter
+- Social media
+- Community forum
+- Anonymous source
+
+D. Time range
+- Last 24h
+- Last 7 days
+- Last 30 days
+
+E. Topic
+Use available topics/categories if they exist.
+
+If filtering logic already exists, wire the new filters into it. If not, create local UI state filtering where simple. Otherwise, keep the controls as UI-ready placeholders without breaking anything.
+
+8. Improve the “News Scan” status module
+
+Replace or improve the existing “News Scan” box so it feels more useful.
+
+Show:
+
+News Scan
+Status: Idle / Scanning
+Last scan: 1 minute ago
+Sources scanned: 43
+New items found: 18
+Flagged as high interest: 4
+Unverified / Chatter: 7
+Next scan: in 14 minutes
+
+Use existing values where available. If not available, use sensible mock values.
+
+Keep the module compact.
+
+9. Add source trail / evidence details
+
+Each card should have an expandable or collapsible “Source trail” section.
+
+It should show:
+
+- Primary source
+- Supporting source, if available
+- Also seen in, if available
+- Source type
+- Confidence reason
+
+Example:
+Source trail:
+Primary source: TechCrunch
+Supporting source: Company blog
+Also seen in: Hacker News, Reddit
+Confidence reason: Reported by an established outlet and partially supported by public information.
+
+If supporting sources are not available, show:
+“No supporting source recorded yet.”
+
+Do not make unsupported claims. If only one source exists, say so.
+
+10. Add duplicate / clustering indicator
+
+AI stories are often repeated across outlets. Add a small indicator to cards where possible:
+
+Example:
+“Covered by 6 sources”
+“Original source: TechCrunch”
+“Also seen in: The Verge, VentureBeat, Hacker News”
+
+If duplicate/clustering data does not exist, create the UI placeholder only, using mock values for sample cards.
+
+Do not build a complex clustering engine unless one already exists.
+
+11. Improve card actions
+
+Each card should have actions:
+
+- Save
+- Source
+- Hide
+- Create alert
+- Share
+- Add to watchlist
+
+If backend behaviour does not exist:
+- Save toggles local saved state
+- Hide removes the card from the current view
+- Create alert opens a small placeholder modal or toast
+- Share copies or displays a placeholder link
+- Add to watchlist shows a confirmation toast
+
+Keep interactions lightweight.
+
+12. Add better empty states
+
+Add empty states for filtered results.
+
+Examples:
+
+No news found:
+“No items match these filters. Try clearing filters or widening your watchlist.”
+
+No high-impact news:
+“No high-impact items found right now. The quiet periods are nice while they last.”
+
+No chatter/rumours:
+“No chatter found for this filter set.”
+
+13. Keep design constraints
+
+Important:
+- Do not rebuild the app from scratch.
+- Do not change the overall page layout unnecessarily.
+- Preserve the existing clean, minimal, light dashboard design.
+- Use the current styling system/components already in the project.
+- Avoid adding unnecessary dependencies.
+- Keep the page responsive.
+- Do not break the existing sidebar or navigation.
+- Do not remove existing functionality unless replacing it with a better version.
+- Prefer simple UI/state changes over complex backend work.
+- Keep copy concise and professional.
+
+14. Suggested card example
+
+Cards should roughly follow this structure:
+
+[Credible] [Medium impact] [Major outlet]       28 mins ago
+
+Tailoring AI solutions for healthcare needs
+
+What happened:
+AI developers are increasingly targeting healthcare use cases including admin workflows, diagnostics, and treatment support.
+
+Why it matters:
+Healthcare AI is a high-value and high-risk market, so credible movement here is worth monitoring.
+
+Signal summary:
+Credibility: Credible
+Impact: Medium
+Interest: High
+Action: Monitor
+
+Confidence:
+Credible — reported by MIT Technology Review, but not independently confirmed from a primary source.
+
+Recommended action:
+Monitor
+
+Source trail:
+Primary source: MIT Technology Review
+Supporting source: No supporting source recorded yet.
+Confidence reason: Reputable publication, but limited primary-source evidence.
+
+Actions:
+Save | Source | Hide | Share | Add to watchlist | Create alert
+
+15. Acceptance criteria
+
+The task is complete when:
+
+- The page subtitle no longer mentions Claude or any specific AI model.
+- “Likely True” has been renamed to “Credible”.
+- “Gossip” has been renamed to “Chatter”.
+- Every card shows credibility and impact separately.
+- Every card includes What happened, Why it matters, Confidence, Signal summary, and Recommended action.
+- High-interest items explain why they are high interest.
+- The right filter panel includes credibility, impact, source type, time range, and topic filters.
+- The News Scan module shows richer scan status details.
+- Cards include a Source trail section.
+- Cards have lightweight actions: Save, Source, Hide, Share, Add to watchlist, and Create alert.
+- Empty states are handled cleanly.
+- The app still runs without errors.
