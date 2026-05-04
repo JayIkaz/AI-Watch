@@ -1,0 +1,183 @@
+Update the existing AIWatch “News & Gossip” card layout. Do not rebuild the page or redesign the app from scratch. Keep the current clean visual style, sidebar, feed layout, filters, badges, and card design. Make a focused UI improvement to reduce wasted vertical space inside each news card.
+
+Main goal:
+The current boxed “Signal summary” area takes up too much space and repeats information already shown in the top badge row. Replace it with a compact single-line signal strip while keeping the same information visible and easy to scan.
+
+1. Remove the large boxed Signal Summary grid
+
+Find the card section that currently displays a large boxed/grid layout containing:
+
+- Credibility
+- Impact
+- Interest
+- Action
+
+Remove this large boxed section from the main card view.
+
+Do not remove the underlying data. Only change how it is displayed.
+
+2. Avoid repeating information already shown in the top badge row
+
+The top of each card already shows badges such as:
+
+- Credible
+- Medium impact
+- Major Outlet
+
+Do not repeat “Credibility” and “Impact” again in a large box lower down the card.
+
+Keep credibility, impact, and source type as compact badges at the top of the card.
+
+3. Add action to the top badge row
+
+Add the recommended action as a small pill/badge in the top badge row.
+
+Example:
+
+[Credible] [Medium impact] [Major Outlet] [Action: Monitor]
+
+The action badge should be visually lightweight and consistent with the existing badge style.
+
+Use the existing recommended action value where available. If no action exists, default to “Monitor”.
+
+4. Replace the boxed grid with a compact single-line signal strip
+
+Instead of the large boxed section, show one compact line below “Why it matters”.
+
+Use this format:
+
+Signal: Credible · Medium impact · Normal interest · Monitor
+
+The line should include:
+
+- Credibility
+- Impact
+- Interest
+- Recommended action
+
+Example outputs:
+
+Signal: Verified · High impact · High interest · Share with team
+Signal: Credible · Medium impact · Normal interest · Monitor
+Signal: Chatter · Low impact · Low interest · Ignore
+
+Style this as a small, subtle text row or lightweight pill strip. It should not look like a large card inside the card.
+
+5. Keep the main card compact by default
+
+The default collapsed card should show only:
+
+- Top badge row
+- Time posted
+- Headline
+- What happened
+- Why it matters
+- Compact signal line
+- Source/action footer
+- Show more control
+
+Do not show the full Confidence and Source Trail sections by default unless the card is expanded.
+
+6. Move detailed evidence behind “Show more”
+
+The following sections should only appear after the user clicks “Show more”:
+
+- Confidence
+- Recommended action explanation
+- Source trail
+- Primary source
+- Supporting source
+- Also seen in
+- Confidence reason
+- Coverage/duplicate source details
+
+When collapsed, these details should be hidden.
+
+7. Keep “Why it matters” visible
+
+Do not hide “Why it matters”. This is important and should remain visible in the default card view.
+
+However, keep it compact:
+- Maximum 1–2 short sentences.
+- No large nested box unless already part of the design.
+- Prefer subtle styling over heavy borders.
+
+8. Suggested collapsed card layout
+
+Use this structure:
+
+[Credible] [Medium impact] [Major Outlet] [Action: Monitor]        about 1 hour ago
+
+Tailoring AI solutions for healthcare needs
+
+WHAT HAPPENED
+AI developers are increasingly targeting healthcare applications to address operational, clinical, and administrative challenges.
+
+WHY IT MATTERS
+Credible reporting from a reputable outlet, but not yet confirmed from a primary source. Worth monitoring.
+
+Signal: Credible · Medium impact · Normal interest · Monitor
+
+MIT Technology Review · Major Outlet                 Save | Share | Alert | Source
+
+Show more
+
+9. Suggested expanded card layout
+
+When the user clicks “Show more”, reveal:
+
+CONFIDENCE
+Credible — MIT Technology Review is a reputable publication, but no primary-source confirmation is recorded.
+
+RECOMMENDED ACTION
+Monitor
+
+SOURCE TRAIL
+Primary source: MIT Technology Review
+Supporting source: No supporting source recorded yet
+Also seen in: Reddit
+Confidence reason: Reputable publication, limited primary-source evidence
+Covered by 2 sources
+
+10. Keep interactions lightweight
+
+Do not add backend complexity.
+
+Use existing state/components where available.
+
+If expansion/collapse already exists, reuse it.
+
+If not, add simple local state per card:
+- collapsed by default
+- expanded when “Show more” is clicked
+- collapsed again when “Show less” is clicked
+
+11. Design constraints
+
+Important:
+- Do not rebuild the app.
+- Do not change the whole card design unnecessarily.
+- Do not remove existing card data.
+- Do not remove credibility, impact, interest, or action.
+- Do not create a second large dashboard inside each card.
+- Use compact badges and text rows.
+- Keep cards scannable.
+- Preserve the existing clean, minimal dashboard style.
+- Avoid adding new dependencies.
+- Keep the page responsive.
+- Make sure the app still runs without errors.
+
+12. Acceptance criteria
+
+The task is complete when:
+
+- The large boxed Credibility / Impact / Interest / Action grid is removed from the default card view.
+- Credibility and Impact remain visible as top badges.
+- Recommended Action appears as a compact top badge.
+- A compact single-line Signal row appears below “Why it matters”.
+- Confidence and Source Trail are hidden by default.
+- Confidence and Source Trail appear only after clicking “Show more”.
+- “Why it matters” remains visible in the default view.
+- The cards take up noticeably less vertical space.
+- The page still looks clean and professional.
+- The app runs without errors.

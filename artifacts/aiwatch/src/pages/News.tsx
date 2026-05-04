@@ -209,6 +209,9 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
                 High Interest
               </span>
             )}
+            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border bg-secondary border-border text-muted-foreground">
+              Action: {action}
+            </span>
           </div>
           <span className="text-xs text-muted-foreground shrink-0 mt-0.5" title={new Date(item.detectedAt).toLocaleString()}>
             {timeAgo}
@@ -237,35 +240,17 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
           <p className="text-sm text-foreground/80 leading-relaxed">{whyItMatters}</p>
         </div>
 
-        {/* High interest reason */}
-        {item.highInterest && (
-          <div className="text-xs text-amber-400/80 bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-2 leading-relaxed">
-            <span className="font-semibold">Why high interest: </span>
-            {deriveHighInterestReason(item)}
-          </div>
-        )}
-
-        {/* Signal summary */}
-        <div className="grid grid-cols-2 gap-1.5 text-xs">
-          <div className="bg-secondary/50 border border-border/50 rounded-lg px-3 py-2">
-            <span className="text-muted-foreground">Credibility</span>
-            <div className={cn("font-semibold mt-0.5", cfg.color)}>{cfg.label}</div>
-          </div>
-          <div className="bg-secondary/50 border border-border/50 rounded-lg px-3 py-2">
-            <span className="text-muted-foreground">Impact</span>
-            <div className={cn("font-semibold mt-0.5", impactCfg.color)}>{impact.replace(" impact", "")}</div>
-          </div>
-          <div className="bg-secondary/50 border border-border/50 rounded-lg px-3 py-2">
-            <span className="text-muted-foreground">Interest</span>
-            <div className={cn("font-semibold mt-0.5", item.highInterest ? "text-amber-400" : "text-muted-foreground")}>
-              {item.highInterest ? "High" : "Normal"}
-            </div>
-          </div>
-          <div className="bg-secondary/50 border border-border/50 rounded-lg px-3 py-2">
-            <span className="text-muted-foreground">Action</span>
-            <div className="font-semibold mt-0.5 text-foreground">{action}</div>
-          </div>
-        </div>
+        {/* Compact signal strip */}
+        <p className="text-xs text-muted-foreground">
+          <span className="font-medium text-foreground/50">Signal:</span>{" "}
+          <span className={cfg.color}>{cfg.label}</span>
+          {" · "}
+          <span className={impactCfg.color}>{impact}</span>
+          {" · "}
+          <span className={item.highInterest ? "text-amber-400" : ""}>{item.highInterest ? "High interest" : "Normal interest"}</span>
+          {" · "}
+          <span className="text-foreground/70">{action}</span>
+        </p>
 
         {/* Expand toggle */}
         <button
@@ -279,6 +264,14 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
         {/* Expanded: confidence + source trail + clustering */}
         {expanded && (
           <div className="space-y-3 border-t border-border/40 pt-3">
+
+            {/* High interest reason (only in expanded view) */}
+            {item.highInterest && (
+              <div className="text-xs text-amber-400/80 bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-2 leading-relaxed">
+                <span className="font-semibold">Why high interest: </span>
+                {deriveHighInterestReason(item)}
+              </div>
+            )}
 
             {/* Confidence */}
             <div>
