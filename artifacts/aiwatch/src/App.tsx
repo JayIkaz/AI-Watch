@@ -14,6 +14,11 @@ import News from "./pages/News";
 import Liked from "./pages/Liked";
 import Login from "./pages/Login";
 import NotFound from "./pages/not-found";
+import DailyBrief from "./pages/DailyBrief";
+import PricingWatch from "./pages/PricingWatch";
+import ModelReleases from "./pages/ModelReleases";
+import ApiChanges from "./pages/ApiChanges";
+import Alerts from "./pages/Alerts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,11 +34,16 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Feed} />
+      <Route path="/daily-brief" component={DailyBrief} />
+      <Route path="/pricing" component={PricingWatch} />
+      <Route path="/model-releases" component={ModelReleases} />
+      <Route path="/api-changes" component={ApiChanges} />
       <Route path="/vendors" component={Vendors} />
       <Route path="/vendors/:slug" component={VendorDetail} />
       <Route path="/categories" component={Categories} />
       <Route path="/news" component={News} />
       <Route path="/liked" component={Liked} />
+      <Route path="/alerts" component={Alerts} />
       <Route path="/settings" component={Settings} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />

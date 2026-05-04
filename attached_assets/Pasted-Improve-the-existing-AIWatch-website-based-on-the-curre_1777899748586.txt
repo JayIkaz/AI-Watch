@@ -1,0 +1,282 @@
+Improve the existing AIWatch website based on the current UI. Do not rebuild the app from scratch. Keep the existing clean visual style, sidebar, cards, and filter layout, but make the product feel more like an AI intelligence platform rather than a generic news feed.
+
+Main goal:
+Turn the feed into a ranked, sourced, actionable AI intelligence dashboard. Each update should help the user quickly understand:
+- what happened
+- why it matters
+- who should care
+- how reliable it is
+- what action to take
+
+Please make the following changes.
+
+1. Improve the page header
+
+Replace the current simple header with a stronger intelligence summary.
+
+Current:
+"Intelligence Feed"
+"The latest AI model releases, API changes, and pricing updates."
+
+Change to:
+"Today’s AI Intelligence"
+"Ranked AI model releases, API changes, pricing updates, and industry signals."
+
+Add a compact summary strip below the header with 4 small stat cards:
+- High-impact updates
+- Pricing changes
+- Model releases
+- Vendors affected
+
+Use sample/mock values from the available data if needed.
+
+Example:
+High-impact updates: 3
+Pricing changes: 2
+Model releases: 5
+Vendors affected: 12
+
+2. Add quick filter chips above the feed
+
+Add horizontal filter chips above the cards:
+- High Impact
+- Model Releases
+- Pricing Changes
+- API Changes
+- Safety & Policy
+- My Vendors
+- Last 24h
+- Rumours
+
+These should be visually lightweight and clickable. If full filtering logic already exists, wire them into it. If not, implement simple local state filtering where possible, or keep them as UI-ready placeholders without breaking the app.
+
+3. Rename “Match %” to something clearer
+
+Anywhere the card currently says something like:
+"95% Match"
+
+Rename it to:
+"Relevance: 95%"
+
+Add a small tooltip or helper text where possible:
+"Based on vendors, categories, keywords, and saved interests."
+
+Do not use the word "Match" unless it is already deeply tied to data logic.
+
+4. Improve every feed card
+
+Update each card so it follows this structure:
+
+- Vendor name
+- Category badge
+- Time posted
+- Credibility badge
+- Headline
+- One-line summary
+- Why it matters
+- Impact level
+- Recommended action
+- Relevance score
+- Action buttons
+
+Each card should include these fields visually:
+
+A. Credibility badge:
+Use one of:
+- Official vendor update
+- Confirmed
+- Credible report
+- Industry rumour
+- Unconfirmed
+
+B. Impact level:
+Use one of:
+- High impact
+- Medium impact
+- Low impact
+
+C. Recommended action:
+Use one of:
+- Review
+- Monitor
+- Test
+- Update roadmap
+- Ignore
+
+D. Why it matters:
+Make this section standard on every card, not optional.
+
+Example wording:
+"Why it matters: This may affect teams using AWS Bedrock for multi-region AI deployments."
+
+E. Who should care:
+Add a small line or badges for:
+- Product teams
+- Developers
+- Enterprise buyers
+- Founders
+- Analysts
+- Investors
+
+Use mock values if needed.
+
+5. Add better card actions
+
+Each card should have these actions:
+- Save
+- Source
+- Hide
+- More like this
+- Less like this
+- Create alert
+
+These can be buttons/icons. If backend behaviour does not exist, implement local UI interactions only:
+- Save toggles saved state
+- Hide removes the card from the current view
+- More like this / Less like this can show a small visual confirmation
+- Create alert can open a small placeholder modal or toast
+
+Do not over-engineer the backend.
+
+6. Make high-impact items stand out
+
+High-impact cards should be more visually prominent:
+- slightly stronger border
+- visible “High impact” badge
+- subtle left accent border
+- still keep the design clean and professional
+
+Do not make the page loud or colourful.
+
+7. Improve the right-side filter panel
+
+Keep the existing filter panel, but make it more useful.
+
+For vendor counts, show activity-style labels where possible:
+Example:
+OpenAI      96   +4 today
+AWS Bedrock 260  +8 today
+Anthropic   3   +1 high impact
+
+If actual daily counts are not available, use sample values or derive them from existing data.
+
+Add a small section called:
+"Signal Type"
+
+Options:
+- Official updates
+- Confirmed reports
+- Rumours
+- Pricing changes
+- Breaking API changes
+
+8. Add an Executive Brief / Daily Brief section
+
+Add either a new page in the sidebar or a prominent tab near the feed called:
+"Daily Brief"
+
+The Daily Brief should show the top 5 most important AI updates in a concise format:
+
+Example layout:
+1. Headline
+Impact: High
+Why it matters: Short explanation
+Recommended action: Review pricing / Monitor / Test
+
+This can use the same feed data. Sort by impact/relevance if possible. If not, use the first 5 high-value mock items.
+
+Add "Daily Brief" to the sidebar navigation.
+
+9. Separate news from rumours
+
+The product includes news and gossip, so the UI must distinguish source confidence clearly.
+
+Add a credibility/confidence layer to cards:
+- Source quality
+- Confidence level
+- Status
+
+Example:
+Confidence: High
+Source quality: Official vendor update
+Status: Confirmed
+
+For rumours:
+Confidence: Medium
+Source quality: Industry chatter
+Status: Unconfirmed
+
+Do not present rumours as facts.
+
+10. Improve empty/loading states
+
+Add sensible empty states:
+- No updates found
+- No high-impact updates
+- No vendor updates matching selected filters
+
+Example:
+"No updates match these filters. Try clearing filters or widening your watchlist."
+
+11. Keep design constraints
+
+Important:
+- Do not rebuild the app from scratch.
+- Preserve the existing clean, minimal, light dashboard design.
+- Use the current styling system/components already in the project.
+- Avoid adding unnecessary dependencies.
+- Keep the layout responsive.
+- Do not break existing navigation.
+- Do not remove existing features unless replacing them with improved versions.
+- Prioritise practical UX over fancy animation.
+
+12. Suggested sidebar navigation
+
+Update the sidebar navigation to include:
+
+- Intelligence Feed
+- Daily Brief
+- News & Gossip
+- Pricing Watch
+- Model Releases
+- API Changes
+- Vendors
+- Categories
+- Saved
+- Alerts
+- Settings
+
+Only create pages that are quick to implement. For any page not fully built, create a clean placeholder page with a short description.
+
+13. Copy tone
+
+Use concise, professional product copy. Avoid hype.
+
+Use wording like:
+- "Ranked intelligence"
+- "Why it matters"
+- "Recommended action"
+- "Confidence"
+- "Relevance"
+- "Source quality"
+- "High impact"
+
+Avoid vague AI language like:
+- "AI-powered magic"
+- "Unlock insights"
+- "Revolutionary intelligence"
+
+14. Acceptance criteria
+
+The task is complete when:
+- The feed header has a useful intelligence summary.
+- Quick filters appear above the feed.
+- “Match” has been renamed to “Relevance”.
+- Every card includes Why it matters, Impact, Confidence, and Recommended action.
+- High-impact updates are visually distinct.
+- Card actions include Save, Source, Hide, More like this, Less like this, and Create alert.
+- The right filter panel includes improved vendor/activity indicators and signal type filters.
+- A Daily Brief page or tab exists.
+- Rumours and confirmed updates are clearly labelled differently.
+- Empty states are handled cleanly.
+- The app still runs without errors.
