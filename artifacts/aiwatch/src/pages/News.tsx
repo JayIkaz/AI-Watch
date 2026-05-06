@@ -15,7 +15,7 @@ import {
   HelpCircle, MessageCircle, Zap, Building2, Heart, Search,
   ChevronDown, ChevronUp, Eye, EyeOff, Share2, BookmarkPlus,
   Bell, AlertCircle, ShieldCheck, Radio, Clock, Database,
-  TrendingUp, BarChart3, List,
+  TrendingUp, BarChart3, List, X,
 } from "lucide-react";
 import { formatDistanceToNow, subHours, subDays } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -635,6 +635,95 @@ export default function News() {
             </p>
           </div>
 
+          {/* Mobile-only horizontally-scrollable filter chip strip */}
+          <div className="lg:hidden -mx-4 px-4 mb-4">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {/* High interest */}
+              <button
+                onClick={() => { setHighInterestOnly(!highInterestOnly); setPage(0); }}
+                className={cn(
+                  "flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                  highInterestOnly
+                    ? "bg-amber-400/10 border-amber-400/40 text-amber-400"
+                    : "bg-card border-border text-muted-foreground"
+                )}
+              >
+                <Zap className="w-3 h-3" />
+                High Interest
+              </button>
+
+              {/* Credibility chips */}
+              {ALL_RATINGS.map(rating => {
+                const cfg = CREDIBILITY_CONFIG[rating];
+                const active = selectedRatings.includes(rating);
+                return (
+                  <button
+                    key={rating}
+                    onClick={() => toggleRating(rating)}
+                    className={cn(
+                      "flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                      active
+                        ? cn(cfg.bg, cfg.border, cfg.color)
+                        : "bg-card border-border text-muted-foreground"
+                    )}
+                  >
+                    {cfg.label}
+                  </button>
+                );
+              })}
+
+              {/* Impact chips */}
+              {ALL_IMPACTS.map(impact => {
+                const cfg = IMPACT_CONFIG[impact];
+                const active = selectedImpacts.includes(impact);
+                return (
+                  <button
+                    key={impact}
+                    onClick={() => toggleImpact(impact)}
+                    className={cn(
+                      "flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                      active
+                        ? cn(cfg.bg, cfg.border, cfg.color)
+                        : "bg-card border-border text-muted-foreground"
+                    )}
+                  >
+                    {impact}
+                  </button>
+                );
+              })}
+
+              {/* Time range chips */}
+              {([["24h", "Last 24h"], ["7d", "Last 7d"], ["30d", "Last 30d"]] as [TimeRange, string][]).map(([key, label]) => {
+                const active = selectedTimeRange === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => toggleTimeRange(key)}
+                    className={cn(
+                      "flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                      active
+                        ? "bg-primary/10 border-primary/30 text-primary"
+                        : "bg-card border-border text-muted-foreground"
+                    )}
+                  >
+                    <Clock className="w-3 h-3" />
+                    {label}
+                  </button>
+                );
+              })}
+
+              {/* Clear all (only when filters active) */}
+              {hasActiveFilters && (
+                <button
+                  onClick={clearAllFilters}
+                  className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border border-border text-muted-foreground bg-card"
+                >
+                  Clear <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          </div>
+
           {searchQuery && (
             <div className="mb-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm text-primary">
               <Search className="w-4 h-4 shrink-0" />
@@ -721,8 +810,8 @@ export default function News() {
           )}
         </div>
 
-        {/* ── Sidebar ───────────────────────────────────────────────────────── */}
-        <div className="w-full lg:w-72 shrink-0">
+        {/* ── Sidebar (hidden on mobile — filters exposed via chip strip above) ── */}
+        <div className="hidden lg:block w-full lg:w-72 shrink-0">
           <div className="sticky top-6 max-h-[calc(100vh-5rem)] overflow-y-auto space-y-4 pr-1">
 
             {/* News Scan module */}

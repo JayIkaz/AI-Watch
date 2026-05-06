@@ -6,6 +6,7 @@ import { Filter, X, Loader2, Database, CheckCircle2, Zap, Search, TrendingUp, Do
 import { cn } from "@/lib/utils";
 import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
 import { useSearchParams } from "wouter";
+import { MobileSearchBar } from "@/components/MobileSearchBar";
 
 type QuickFilter = "high-impact" | "model-releases" | "pricing" | "api-changes" | "safety" | "last-24h";
 
@@ -133,6 +134,9 @@ export default function Feed() {
             <h1 className="text-3xl font-display font-bold text-foreground mb-1">Today's AI Intelligence</h1>
             <p className="text-muted-foreground">Ranked AI model releases, API changes, pricing updates, and industry signals.</p>
           </div>
+
+          {/* Mobile-only search bar */}
+          <MobileSearchBar />
 
           {/* Stats strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
