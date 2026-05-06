@@ -10,6 +10,7 @@ import {
   type NewsCredibility,
 } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
+import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { SkeletonNewsCard } from "@/components/SkeletonCard";
 import { useLikes } from "@/contexts/LikesContext";
 import { useToast } from "@/hooks/use-toast";
@@ -639,6 +640,8 @@ export default function News() {
               AI industry news from major outlets, tech blogs, social media, and community sources — rated by source quality, corroboration, and confidence.
             </p>
           </div>
+
+          <MobileSearchBar />
 
           {/* Mobile-only horizontally-scrollable filter chip strip */}
           <div className="lg:hidden -mx-4 px-4 mb-4">
