@@ -356,12 +356,12 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
             <span>{SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType}</span>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             {/* Save */}
             <button
               onClick={() => toggle("news", item.id)}
               className={cn(
-                "p-1.5 rounded-lg transition-all duration-200",
+                "p-2.5 rounded-lg transition-all duration-200",
                 liked ? "text-rose-400" : "text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10"
               )}
               title={liked ? "Saved" : "Save"}
@@ -372,7 +372,7 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
             {/* Add to watchlist */}
             <button
               onClick={() => toast({ title: "Added to watchlist", description: `"${item.title.slice(0, 40)}…" added to your watchlist.` })}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+              className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
               title="Add to watchlist"
             >
               <BookmarkPlus className="w-4 h-4" />
@@ -386,7 +386,7 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
                 }
                 toast({ title: "Link copied", description: "Source URL copied to clipboard." });
               }}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
               title="Share"
             >
               <Share2 className="w-4 h-4" />
@@ -395,7 +395,7 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
             {/* Create alert */}
             <button
               onClick={() => toast({ title: "Alert created", description: `You'll be notified about similar items from ${item.sourceName}.` })}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+              className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
               title="Create alert"
             >
               <Bell className="w-4 h-4" />
@@ -404,7 +404,7 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
             {/* Hide */}
             <button
               onClick={() => setHidden(true)}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
               title="Hide"
             >
               <EyeOff className="w-4 h-4" />

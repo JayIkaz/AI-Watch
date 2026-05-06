@@ -234,15 +234,15 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {/* Expand / collapse */}
           {!compact && (
             <button
               onClick={() => setExpanded(v => !v)}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
               title={expanded ? "Show less" : "Show more details"}
             >
-              {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           )}
 
@@ -250,52 +250,52 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           <button
             onClick={() => toggle("update", update.id)}
             className={cn(
-              "p-1.5 rounded-lg transition-all duration-200",
+              "p-2.5 rounded-lg transition-all duration-200",
               liked
                 ? "text-rose-400 hover:text-rose-300"
                 : "text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10"
             )}
             title={liked ? "Remove from Saved" : "Save"}
           >
-            <Heart className={cn("w-3.5 h-3.5 transition-transform", liked && "fill-current scale-110")} />
+            <Heart className={cn("w-4 h-4 transition-transform", liked && "fill-current scale-110")} />
           </button>
 
           {/* Hide */}
           {onHide && (
             <button
               onClick={onHide}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
               title="Hide this update"
             >
-              <EyeOff className="w-3.5 h-3.5" />
+              <EyeOff className="w-4 h-4" />
             </button>
           )}
 
           {/* More like this */}
           <button
             onClick={() => toast({ title: "Preference noted", description: "You'll see more updates like this." })}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-emerald-400 hover:bg-emerald-400/10 transition-all"
+            className="p-2.5 rounded-lg text-muted-foreground hover:text-emerald-400 hover:bg-emerald-400/10 transition-all"
             title="More like this"
           >
-            <ThumbsUp className="w-3.5 h-3.5" />
+            <ThumbsUp className="w-4 h-4" />
           </button>
 
           {/* Less like this */}
           <button
             onClick={() => toast({ title: "Preference noted", description: "You'll see fewer updates like this." })}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10 transition-all"
+            className="p-2.5 rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10 transition-all"
             title="Less like this"
           >
-            <ThumbsDown className="w-3.5 h-3.5" />
+            <ThumbsDown className="w-4 h-4" />
           </button>
 
           {/* Create alert */}
           <button
             onClick={() => toast({ title: "Alert created", description: `You'll be notified about similar ${update.category.name} updates from ${update.vendor.name}.` })}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+            className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
             title="Create alert"
           >
-            <Bell className="w-3.5 h-3.5" />
+            <Bell className="w-4 h-4" />
           </button>
 
           {/* Source */}
