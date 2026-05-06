@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
-import { useListUpdates, useListVendors, useListCategories } from "@workspace/api-client-react";
+import { useListUpdates, getListUpdatesQueryKey, useListVendors, useListCategories } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
 import { SkeletonUpdateCard } from "@/components/SkeletonCard";
@@ -80,9 +80,9 @@ export default function Feed() {
     }
   );
 
-  const { data: statsHighImpact }   = useListUpdates({ highImpact: true,           limit: 1 }, { query: { staleTime: 60_000 } });
-  const { data: statsPricing }      = useListUpdates({ category: "pricing",         limit: 1 }, { query: { staleTime: 60_000 } });
-  const { data: statsModels }       = useListUpdates({ category: "model-release",   limit: 1 }, { query: { staleTime: 60_000 } });
+  const { data: statsHighImpact }   = useListUpdates({ highImpact: true,           limit: 1 }, { query: { queryKey: getListUpdatesQueryKey({ highImpact: true,           limit: 1 }), staleTime: 60_000 } });
+  const { data: statsPricing }      = useListUpdates({ category: "pricing",         limit: 1 }, { query: { queryKey: getListUpdatesQueryKey({ category: "pricing",         limit: 1 }), staleTime: 60_000 } });
+  const { data: statsModels }       = useListUpdates({ category: "model-release",   limit: 1 }, { query: { queryKey: getListUpdatesQueryKey({ category: "model-release",   limit: 1 }), staleTime: 60_000 } });
   const { data: vendorsData }       = useListVendors({});
   const { data: categoriesData }    = useListCategories({});
 

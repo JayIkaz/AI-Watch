@@ -1,7 +1,7 @@
 import { createContext, useContext, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { LikeIds } from "@workspace/api-client-react";
-import { useGetMe } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 
 export const LIKES_QK = ["/api/v1/likes"] as const;
 export const LIKED_ITEMS_QK = ["/api/v1/likes/items"] as const;
@@ -21,7 +21,7 @@ const LikesContext = createContext<LikesContextValue>({
 });
 
 export function LikesProvider({ children }: { children: React.ReactNode }) {
-  const { data: user } = useGetMe({ query: { retry: false } });
+  const { data: user } = useGetMe({ query: { queryKey: getGetMeQueryKey(), retry: false } });
   const qc = useQueryClient();
 
   const { data } = useQuery<LikeIds>({

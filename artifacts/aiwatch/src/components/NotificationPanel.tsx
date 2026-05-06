@@ -15,9 +15,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import {
   useListUpdates,
+  getListUpdatesQueryKey,
   useListNews,
+  getListNewsQueryKey,
   useGetIngestionStatus,
+  getGetIngestionStatusQueryKey,
   useGetNewsStatus,
+  getGetNewsStatusQueryKey,
 } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
 
@@ -49,21 +53,21 @@ export function NotificationBell() {
       date_from: lastViewedAt ?? undefined,
       limit: 5,
     },
-    { query: { refetchInterval: 30000 } }
+    { query: { queryKey: getListUpdatesQueryKey({ highImpact: true, date_from: lastViewedAt ?? undefined, limit: 5 }), refetchInterval: 30000 } }
   );
 
   // High-interest news (client-side date filter)
   const { data: newsData, isLoading: newsLoading } = useListNews(
     { highInterest: true, limit: 10 },
-    { query: { refetchInterval: 30000 } }
+    { query: { queryKey: getListNewsQueryKey({ highInterest: true, limit: 10 }), refetchInterval: 30000 } }
   );
 
   const { data: ingestionStatus } = useGetIngestionStatus({
-    query: { refetchInterval: 10000 },
+    query: { queryKey: getGetIngestionStatusQueryKey(), refetchInterval: 10000 },
   });
 
   const { data: newsStatus } = useGetNewsStatus({
-    query: { refetchInterval: 10000 },
+    query: { queryKey: getGetNewsStatusQueryKey(), refetchInterval: 10000 },
   });
 
   const newUpdates = updatesData?.updates ?? [];
@@ -164,8 +168,8 @@ export function NotificationBell() {
                     dot="amber"
                     title={u.title}
                     meta={[
-                      u.vendorName,
-                      u.categoryName,
+                      u.vendor.name,
+                      u.category.name,
                       u.publishedAt
                         ? formatDistanceToNow(new Date(u.publishedAt), { addSuffix: true })
                         : undefined,
@@ -220,7 +224,7 @@ function ScanStatusSection({
   ingestionStatus,
   newsStatus,
 }: {
-  ingestionStatus?: { isRunning: boolean; lastRunAt: string | null; totalItems: number };
+  ingestionStatus?: { isRunning: boolean; lastRunAt?: string | null; lastRunItemsProcessed: number };
   newsStatus?: { isRunning: boolean; lastRunAt: string | null; totalItems: number };
 }) {
   if (!ingestionStatus && !newsStatus) return null;
@@ -234,8 +238,8 @@ function ScanStatusSection({
         <StatusRow
           label="Vendor ingestion"
           isRunning={ingestionStatus.isRunning}
-          lastRunAt={ingestionStatus.lastRunAt}
-          totalItems={ingestionStatus.totalItems}
+          lastRunAt={ingestionStatus.lastRunAt ?? null}
+          totalItems={ingestionStatus.lastRunItemsProcessed}
           itemLabel="updates"
         />
       )}

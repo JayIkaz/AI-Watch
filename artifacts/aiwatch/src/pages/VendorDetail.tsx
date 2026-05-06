@@ -1,5 +1,5 @@
 import { useParams } from "wouter";
-import { useGetVendor, useListUpdates } from "@workspace/api-client-react";
+import { useGetVendor, useListUpdates, getListUpdatesQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
 import { Cpu, ExternalLink, Activity, ArrowLeft } from "lucide-react";
@@ -8,14 +8,10 @@ import { Link } from "wouter";
 export default function VendorDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { data: vendor, isLoading: isLoadingVendor } = useGetVendor(slug || "");
-  const { data: updatesData, isLoading: isLoadingUpdates } = useListUpdates({
-    query: {
-      enabled: !!slug,
-      queryKey: ["/api/v1/updates", slug]
-    },
-    vendor: slug,
-    limit: 50
-  });
+  const { data: updatesData, isLoading: isLoadingUpdates } = useListUpdates(
+    { vendor: slug, limit: 50 },
+    { query: { queryKey: getListUpdatesQueryKey({ vendor: slug, limit: 50 }), enabled: !!slug } }
+  );
 
   if (isLoadingVendor) {
     return (

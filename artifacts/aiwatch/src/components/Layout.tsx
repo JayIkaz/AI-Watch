@@ -16,7 +16,7 @@ import {
   Bell,
   Menu,
 } from "lucide-react";
-import { useGetMe, useGetIngestionStatus, useTriggerIngestion } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey, useGetIngestionStatus, getGetIngestionStatusQueryKey, useTriggerIngestion } from "@workspace/api-client-react";
 import { NotificationBell } from "./NotificationPanel";
 import { OfflineBanner } from "./OfflineBanner";
 import { cn } from "@/lib/utils";
@@ -241,10 +241,10 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const { data: user, isLoading: isLoadingUser } = useGetMe({
-    query: { retry: false },
+    query: { queryKey: getGetMeQueryKey(), retry: false },
   });
   const { data: ingestionStatus } = useGetIngestionStatus({
-    query: { refetchInterval: 10000 },
+    query: { queryKey: getGetIngestionStatusQueryKey(), refetchInterval: 10000 },
   });
   const triggerIngestion = useTriggerIngestion();
 

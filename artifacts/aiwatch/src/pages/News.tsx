@@ -5,6 +5,7 @@ import {
   useListNews,
   useTriggerNewsIngestion,
   useGetNewsStatus,
+  getGetNewsStatusQueryKey,
   type NewsItem,
   type NewsCredibility,
 } from "@workspace/api-client-react";
@@ -465,7 +466,7 @@ function FilterChip({
 
 // ── News Scan Status module ───────────────────────────────────────────────────
 function NewsScanStatus({ onTrigger, isPending }: { onTrigger: () => void; isPending: boolean }) {
-  const { data: status } = useGetNewsStatus({ query: { refetchInterval: 10000 } });
+  const { data: status } = useGetNewsStatus({ query: { queryKey: getGetNewsStatusQueryKey(), refetchInterval: 10000 } });
 
   const isRunning = status?.isRunning ?? false;
   const lastRunAt = status?.lastRunAt ? new Date(status.lastRunAt) : null;
