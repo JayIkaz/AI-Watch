@@ -1,6 +1,6 @@
-import { useListUpdates } from "@workspace/api-client-react";
+import { useListUpdates, getListUpdatesQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
-import { Loader2, Zap, BookOpen, ExternalLink, ShieldAlert, ArrowRight } from "lucide-react";
+import { Loader2, Zap, BookOpen, ExternalLink, ShieldAlert, ArrowRight, DollarSign, Cpu, Code2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn, getCategoryColor } from "@/lib/utils";
 import { Link } from "wouter";
@@ -23,19 +23,38 @@ function getImpactColor(highImpact: boolean, score?: number | null) {
   return "text-muted-foreground";
 }
 
+const STAT_CATEGORIES = [
+  { label: "Pricing changes",  slug: "pricing",       icon: DollarSign, color: "text-green-400",  bg: "bg-green-400/10",  href: "/pricing" },
+  { label: "Model releases",   slug: "model-release", icon: Cpu,        color: "text-blue-400",   bg: "bg-blue-400/10",   href: "/model-releases" },
+  { label: "API changes",      slug: "api-changelog", icon: Code2,      color: "text-orange-400", bg: "bg-orange-400/10", href: "/api-changes" },
+];
+
 export default function DailyBrief() {
   const today = new Date();
   const formatted = today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
+  const highImpactParams = { highImpact: true, limit: 5 } as const;
+  const recentParams = { limit: 20 } as const;
+
   const { data, isLoading } = useListUpdates(
-    { highImpact: true, limit: 5 },
-    { query: { staleTime: 5 * 60 * 1000 } }
+    highImpactParams,
+    { query: { queryKey: getListUpdatesQueryKey(highImpactParams), staleTime: 5 * 60 * 1000 } }
   );
 
   const { data: recentData, isLoading: recentLoading } = useListUpdates(
-    { limit: 20 },
-    { query: { staleTime: 5 * 60 * 1000 } }
+    recentParams,
+    { query: { queryKey: getListUpdatesQueryKey(recentParams), staleTime: 5 * 60 * 1000 } }
   );
+
+  const { data: pricingStats }  = useListUpdates({ category: "pricing",       limit: 1 }, { query: { queryKey: getListUpdatesQueryKey({ category: "pricing",       limit: 1 }), staleTime: 60_000 } });
+  const { data: modelStats }    = useListUpdates({ category: "model-release", limit: 1 }, { query: { queryKey: getListUpdatesQueryKey({ category: "model-release", limit: 1 }), staleTime: 60_000 } });
+  const { data: apiStats }      = useListUpdates({ category: "api-changelog", limit: 1 }, { query: { queryKey: getListUpdatesQueryKey({ category: "api-changelog", limit: 1 }), staleTime: 60_000 } });
+
+  const statTotals: Record<string, number | undefined> = {
+    "pricing":       pricingStats?.total,
+    "model-release": modelStats?.total,
+    "api-changelog": apiStats?.total,
+  };
 
   const highImpactItems = data?.updates ?? [];
 
@@ -48,7 +67,8 @@ export default function DailyBrief() {
   return (
     <Layout>
       <div className="max-w-3xl">
-        <div className="mb-8">
+        {/* Header */}
+        <div className="mb-6">
           <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-widest mb-2">
             <BookOpen className="w-3.5 h-3.5" />
             Daily Brief
@@ -61,6 +81,28 @@ export default function DailyBrief() {
           </p>
         </div>
 
+        {/* Category stats strip */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {STAT_CATEGORIES.map(({ label, slug, icon: Icon, color, bg, href }) => (
+            <Link
+              key={slug}
+              href={href}
+              className="bg-card border border-border rounded-xl p-3 flex items-center gap-3 hover:border-primary/30 hover:shadow-md transition-all group"
+            >
+              <div className={cn("p-1.5 rounded-lg shrink-0", bg, color)}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className={cn("text-xl font-bold leading-none mb-0.5", color)}>
+                  {statTotals[slug] ?? "—"}
+                </div>
+                <div className="text-xs text-muted-foreground leading-tight truncate">{label}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Brief items */}
         {isLoading || recentLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
