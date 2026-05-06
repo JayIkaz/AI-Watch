@@ -239,7 +239,7 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           {!compact && (
             <button
               onClick={() => setExpanded(v => !v)}
-              className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
               title={expanded ? "Show less" : "Show more details"}
             >
               {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -250,7 +250,7 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           <button
             onClick={() => toggle("update", update.id)}
             className={cn(
-              "p-2.5 rounded-lg transition-all duration-200",
+              "h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-200",
               liked
                 ? "text-rose-400 hover:text-rose-300"
                 : "text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10"
@@ -264,7 +264,7 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           {onHide && (
             <button
               onClick={onHide}
-              className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
               title="Hide this update"
             >
               <EyeOff className="w-4 h-4" />
@@ -274,7 +274,7 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           {/* More like this */}
           <button
             onClick={() => toast({ title: "Preference noted", description: "You'll see more updates like this." })}
-            className="p-2.5 rounded-lg text-muted-foreground hover:text-emerald-400 hover:bg-emerald-400/10 transition-all"
+            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-emerald-400 hover:bg-emerald-400/10 transition-all"
             title="More like this"
           >
             <ThumbsUp className="w-4 h-4" />
@@ -283,7 +283,7 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           {/* Less like this */}
           <button
             onClick={() => toast({ title: "Preference noted", description: "You'll see fewer updates like this." })}
-            className="p-2.5 rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10 transition-all"
+            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10 transition-all"
             title="Less like this"
           >
             <ThumbsDown className="w-4 h-4" />
@@ -292,7 +292,7 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           {/* Create alert */}
           <button
             onClick={() => toast({ title: "Alert created", description: `You'll be notified about similar ${update.category.name} updates from ${update.vendor.name}.` })}
-            className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
             title="Create alert"
           >
             <Bell className="w-4 h-4" />
