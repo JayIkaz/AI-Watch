@@ -28,7 +28,7 @@ interface LayoutProps {
 const BOTTOM_TABS = [
   { href: "/",            label: "Feed",  icon: Activity },
   { href: "/news",        label: "News",  icon: Newspaper },
-  { href: "/daily-brief", label: "Brief", icon: BookOpen },
+  { href: "/daily-brief", label: "Daily Brief", icon: BookOpen },
   { href: "/liked",       label: "Saved", icon: Heart },
   { href: "/alerts",      label: "Alerts",icon: Bell },
 ];
