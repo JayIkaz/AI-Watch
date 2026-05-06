@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useGetMe, useGetIngestionStatus, useTriggerIngestion } from "@workspace/api-client-react";
 import { NotificationBell } from "./NotificationPanel";
+import { OfflineBanner } from "./OfflineBanner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -383,6 +384,9 @@ export function Layout({ children }: LayoutProps) {
             </button>
           </div>
         </div>
+
+        {/* Offline / API-unreachable banner */}
+        <OfflineBanner />
 
         {/* Page content — pb-24 on mobile for bottom tab bar */}
         <div className="p-4 md:p-8 max-w-7xl mx-auto pb-24 md:pb-8">

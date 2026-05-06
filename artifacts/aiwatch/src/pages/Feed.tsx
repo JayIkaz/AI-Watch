@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useListUpdates, useListVendors, useListCategories } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
-import { Filter, X, Loader2, Database, CheckCircle2, Zap, Search, TrendingUp, DollarSign, Cpu, Building2 } from "lucide-react";
+import { SkeletonUpdateCard } from "@/components/SkeletonCard";
+import { Filter, X, Database, CheckCircle2, Zap, Search, TrendingUp, DollarSign, Cpu, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
 import { useSearchParams } from "wouter";
@@ -54,7 +56,7 @@ export default function Feed() {
     ? new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     : undefined;
 
-  const { data: updatesData, isLoading: isLoadingUpdates } = useListUpdates(
+  const { data: updatesData, isLoading: isLoadingUpdates, isError: isErrorUpdates } = useListUpdates(
     {
       vendor:     selectedVendors.join(",") || undefined,
       category:   effectiveCategories.join(",") || undefined,
@@ -72,6 +74,8 @@ export default function Feed() {
           effectiveCategories.join(","),
           page, chipHighImpact, searchQuery, date24hAgo,
         ],
+        placeholderData: keepPreviousData,
+        staleTime: 2 * 60 * 1000,
       },
     }
   );
@@ -198,9 +202,18 @@ export default function Feed() {
 
           {/* Feed */}
           {isLoadingUpdates ? (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-              <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
-              <p>Scanning intelligence channels...</p>
+            <div className="space-y-5">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonUpdateCard key={i} />
+              ))}
+            </div>
+          ) : isErrorUpdates && visibleUpdates.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card/30 border border-dashed border-border rounded-3xl">
+              <Database className="w-12 h-12 mb-4 opacity-20" />
+              <p className="text-lg font-medium text-foreground mb-1">Unable to load updates</p>
+              <p className="text-sm text-center max-w-md">
+                The server may be temporarily unavailable. Cached data will appear automatically when connectivity is restored.
+              </p>
             </div>
           ) : visibleUpdates.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card/30 border border-dashed border-border rounded-3xl">

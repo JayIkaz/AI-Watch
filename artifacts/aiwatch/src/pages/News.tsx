@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useSearchParams } from "wouter";
 import {
   useListNews,
@@ -8,10 +9,11 @@ import {
   type NewsCredibility,
 } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
+import { SkeletonNewsCard } from "@/components/SkeletonCard";
 import { useLikes } from "@/contexts/LikesContext";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ExternalLink, Loader2, Newspaper, RefreshCw, CheckCircle,
+  ExternalLink, Newspaper, RefreshCw, CheckCircle,
   HelpCircle, MessageCircle, Zap, Building2, Heart, Search,
   ChevronDown, ChevronUp, Eye, EyeOff, Share2, BookmarkPlus,
   Bell, AlertCircle, ShieldCheck, Radio, Clock, Database,
@@ -553,7 +555,7 @@ export default function News() {
   const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
   const triggerIngestion = useTriggerNewsIngestion();
 
-  const { data, isLoading } = useListNews(
+  const { data, isLoading, isError: isErrorNews } = useListNews(
     {
       credibility: selectedRatings.length > 0 ? selectedRatings.join(",") : undefined,
       highInterest: highInterestOnly ? true : undefined,
@@ -565,6 +567,8 @@ export default function News() {
       query: {
         queryKey: ["/api/v1/news", selectedRatings.join(","), highInterestOnly, page, searchQuery],
         refetchInterval: 30000,
+        placeholderData: keepPreviousData,
+        staleTime: 2 * 60 * 1000,
       },
     }
   );
@@ -765,9 +769,18 @@ export default function News() {
           )}
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-              <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
-              <p>Gathering intelligence…</p>
+            <div className="space-y-5">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonNewsCard key={i} />
+              ))}
+            </div>
+          ) : isErrorNews && !filteredNews.length ? (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card/30 border border-dashed border-border rounded-3xl">
+              <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
+              <p className="text-lg font-medium text-foreground mb-2">Unable to load news</p>
+              <p className="text-sm text-center max-w-md leading-relaxed">
+                The server may be temporarily unavailable. Cached data will appear automatically when connectivity is restored.
+              </p>
             </div>
           ) : !filteredNews.length ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card/30 border border-dashed border-border rounded-3xl">
