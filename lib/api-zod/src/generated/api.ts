@@ -40,6 +40,22 @@ export const ListVendorsResponse = zod.object({
 });
 
 /**
+ * @summary Get update counts per vendor for a given category
+ */
+export const GetVendorCountsQueryParams = zod.object({
+  category: zod.coerce.string().describe("Category slug to filter counts by"),
+});
+
+export const GetVendorCountsResponse = zod.object({
+  counts: zod.array(
+    zod.object({
+      slug: zod.string(),
+      count: zod.number(),
+    }),
+  ),
+});
+
+/**
  * @summary Get a single vendor by slug
  */
 export const GetVendorParams = zod.object({
@@ -112,6 +128,10 @@ export const ListUpdatesQueryParams = zod.object({
     .boolean()
     .optional()
     .describe("Filter by review flag status"),
+  highImpact: zod.coerce
+    .boolean()
+    .optional()
+    .describe("Filter to high-impact updates only"),
 });
 
 export const ListUpdatesResponse = zod.object({
@@ -286,6 +306,85 @@ export const CreateApiKeyBody = zod.object({
  */
 export const DeleteApiKeyParams = zod.object({
   id: zod.coerce.number(),
+});
+
+/**
+ * @summary List AI news items with optional filters
+ */
+export const listNewsQueryLimitDefault = 20;
+export const listNewsQueryLimitMax = 100;
+
+export const listNewsQueryOffsetDefault = 0;
+export const listNewsQueryOffsetMin = 0;
+
+export const ListNewsQueryParams = zod.object({
+  credibility: zod.coerce
+    .string()
+    .optional()
+    .describe("Filter by credibility rating (comma-separated for multiple)"),
+  highInterest: zod.coerce.boolean().optional(),
+  keyword: zod.coerce.string().optional(),
+  vendor: zod.coerce.string().optional(),
+  limit: zod.coerce
+    .number()
+    .min(1)
+    .max(listNewsQueryLimitMax)
+    .default(listNewsQueryLimitDefault),
+  offset: zod.coerce
+    .number()
+    .min(listNewsQueryOffsetMin)
+    .default(listNewsQueryOffsetDefault),
+});
+
+export const ListNewsResponse = zod.object({
+  news: zod.array(
+    zod.object({
+      id: zod.number(),
+      title: zod.string(),
+      summary: zod.string().nullish(),
+      rawContent: zod.string().nullish(),
+      sourceUrl: zod.string().nullish(),
+      sourceName: zod.string(),
+      sourceType: zod.enum([
+        "major-outlet",
+        "tech-blog",
+        "newsletter",
+        "social",
+        "forum",
+      ]),
+      credibilityRating: zod.enum([
+        "verified",
+        "likely",
+        "unverified",
+        "gossip",
+      ]),
+      credibilityReason: zod.string().nullish(),
+      mentionedVendors: zod.array(zod.string()).nullish(),
+      publishedAt: zod.date().nullish(),
+      detectedAt: zod.date(),
+      highInterest: zod.boolean(),
+      deduplicationHash: zod.string().nullish(),
+    }),
+  ),
+  total: zod.number(),
+});
+
+/**
+ * @summary Manually trigger the news ingestion pipeline
+ */
+export const TriggerNewsIngestionResponse = zod.object({
+  started: zod.boolean(),
+  message: zod.string(),
+  jobId: zod.string().nullish(),
+});
+
+/**
+ * @summary Get news ingestion status
+ */
+export const GetNewsStatusResponse = zod.object({
+  isRunning: zod.boolean(),
+  lastRunAt: zod.date().nullish(),
+  totalItems: zod.number(),
 });
 
 /**

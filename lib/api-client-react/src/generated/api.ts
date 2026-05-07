@@ -21,14 +21,18 @@ import type {
   CreateApiKeyBody,
   ErrorResponse,
   FlagUpdateBody,
+  GetVendorCountsParams,
   HealthStatus,
   IngestionResult,
   IngestionStatus,
   ListApiKeys200,
   ListCategories200,
+  ListNewsParams,
+  ListNewsResponse,
   ListUpdatesParams,
   ListVendors200,
   ListVendorsParams,
+  NewsStatus,
   TriggerIngestionBody,
   Update,
   UpdatesResponse,
@@ -36,6 +40,7 @@ import type {
   UserPreferences,
   UserPreferencesBody,
   Vendor,
+  VendorCountsResponse,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -208,6 +213,100 @@ export function useListVendors<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListVendorsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get update counts per vendor for a given category
+ */
+export const getGetVendorCountsUrl = (params: GetVendorCountsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/vendors/counts?${stringifiedParams}`
+    : `/api/v1/vendors/counts`;
+};
+
+export const getVendorCounts = async (
+  params: GetVendorCountsParams,
+  options?: RequestInit,
+): Promise<VendorCountsResponse> => {
+  return customFetch<VendorCountsResponse>(getGetVendorCountsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetVendorCountsQueryKey = (params?: GetVendorCountsParams) => {
+  return [`/api/v1/vendors/counts`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetVendorCountsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getVendorCounts>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetVendorCountsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getVendorCounts>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetVendorCountsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getVendorCounts>>> = ({
+    signal,
+  }) => getVendorCounts(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getVendorCounts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetVendorCountsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getVendorCounts>>
+>;
+export type GetVendorCountsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get update counts per vendor for a given category
+ */
+
+export function useGetVendorCounts<
+  TData = Awaited<ReturnType<typeof getVendorCounts>>,
+  TError = ErrorType<unknown>,
+>(
+  params: GetVendorCountsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getVendorCounts>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetVendorCountsQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -1112,6 +1211,256 @@ export const useDeleteApiKey = <
 };
 
 /**
+ * @summary List AI news items with optional filters
+ */
+export const getListNewsUrl = (params?: ListNewsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/news?${stringifiedParams}`
+    : `/api/v1/news`;
+};
+
+export const listNews = async (
+  params?: ListNewsParams,
+  options?: RequestInit,
+): Promise<ListNewsResponse> => {
+  return customFetch<ListNewsResponse>(getListNewsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListNewsQueryKey = (params?: ListNewsParams) => {
+  return [`/api/v1/news`, ...(params ? [params] : [])] as const;
+};
+
+export const getListNewsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listNews>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListNewsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listNews>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListNewsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listNews>>> = ({
+    signal,
+  }) => listNews(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listNews>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListNewsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listNews>>
+>;
+export type ListNewsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List AI news items with optional filters
+ */
+
+export function useListNews<
+  TData = Awaited<ReturnType<typeof listNews>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListNewsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listNews>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListNewsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Manually trigger the news ingestion pipeline
+ */
+export const getTriggerNewsIngestionUrl = () => {
+  return `/api/v1/news/trigger`;
+};
+
+export const triggerNewsIngestion = async (
+  options?: RequestInit,
+): Promise<IngestionResult> => {
+  return customFetch<IngestionResult>(getTriggerNewsIngestionUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getTriggerNewsIngestionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof triggerNewsIngestion>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof triggerNewsIngestion>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["triggerNewsIngestion"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof triggerNewsIngestion>>,
+    void
+  > = () => {
+    return triggerNewsIngestion(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TriggerNewsIngestionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof triggerNewsIngestion>>
+>;
+
+export type TriggerNewsIngestionMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Manually trigger the news ingestion pipeline
+ */
+export const useTriggerNewsIngestion = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof triggerNewsIngestion>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof triggerNewsIngestion>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getTriggerNewsIngestionMutationOptions(options));
+};
+
+/**
+ * @summary Get news ingestion status
+ */
+export const getGetNewsStatusUrl = () => {
+  return `/api/v1/news/status`;
+};
+
+export const getNewsStatus = async (
+  options?: RequestInit,
+): Promise<NewsStatus> => {
+  return customFetch<NewsStatus>(getGetNewsStatusUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetNewsStatusQueryKey = () => {
+  return [`/api/v1/news/status`] as const;
+};
+
+export const getGetNewsStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getNewsStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getNewsStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetNewsStatusQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getNewsStatus>>> = ({
+    signal,
+  }) => getNewsStatus({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getNewsStatus>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetNewsStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getNewsStatus>>
+>;
+export type GetNewsStatusQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get news ingestion status
+ */
+
+export function useGetNewsStatus<
+  TData = Awaited<ReturnType<typeof getNewsStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getNewsStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetNewsStatusQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * @summary Manually trigger the ingestion pipeline
  */
 export const getTriggerIngestionUrl = () => {
@@ -1270,80 +1619,4 @@ export function useGetIngestionStatus<
   };
 
   return { ...query, queryKey: queryOptions.queryKey };
-}
-
-// ─── News ──────────────────────────────────────────────────────────────────
-
-export const getListNewsUrl = (params?: import("./api.schemas").ListNewsParams) => {
-  const normalizedParams = new URLSearchParams();
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) normalizedParams.append(key, value === null ? "null" : value.toString());
-  });
-  const s = normalizedParams.toString();
-  return s.length > 0 ? `/api/v1/news?${s}` : `/api/v1/news`;
-};
-
-export const listNews = async (
-  params?: import("./api.schemas").ListNewsParams,
-  options?: RequestInit,
-): Promise<import("./api.schemas").NewsResponse> => {
-  return customFetch<import("./api.schemas").NewsResponse>(getListNewsUrl(params), { ...options, method: "GET" });
-};
-
-export const getListNewsQueryKey = (params?: import("./api.schemas").ListNewsParams) =>
-  [`/api/v1/news`, ...(params ? [params] : [])] as const;
-
-export function useListNews<
-  TData = Awaited<ReturnType<typeof listNews>>,
-  TError = ErrorType<unknown>,
->(
-  params?: import("./api.schemas").ListNewsParams,
-  options?: {
-    query?: UseQueryOptions<Awaited<ReturnType<typeof listNews>>, TError, TData>;
-    request?: SecondParameter<typeof customFetch>;
-  },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-  const queryKey = queryOptions?.queryKey ?? getListNewsQueryKey(params);
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof listNews>>> = ({ signal }) =>
-    listNews(params, { signal, ...requestOptions });
-  const query = useQuery({ queryKey, queryFn, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-  return { ...query, queryKey };
-}
-
-export const triggerNewsIngestion = async (options?: RequestInit): Promise<import("./api.schemas").TriggerNewsIngestion200> => {
-  return customFetch<import("./api.schemas").TriggerNewsIngestion200>(`/api/v1/news/trigger`, { ...options, method: "POST" });
-};
-
-export function useTriggerNewsIngestion<TError = ErrorType<unknown>, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof triggerNewsIngestion>>, TError, void, TContext>;
-    request?: SecondParameter<typeof customFetch>;
-  },
-): UseMutationResult<Awaited<ReturnType<typeof triggerNewsIngestion>>, TError, void, TContext> {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof triggerNewsIngestion>>, void> = () =>
-    triggerNewsIngestion(requestOptions);
-  return useMutation({ mutationFn, ...mutationOptions });
-}
-
-export const getNewsStatus = async (options?: RequestInit): Promise<import("./api.schemas").NewsIngestionStatus> => {
-  return customFetch<import("./api.schemas").NewsIngestionStatus>(`/api/v1/news/status`, { ...options, method: "GET" });
-};
-
-export const getGetNewsStatusQueryKey = () => [`/api/v1/news/status`] as const;
-
-export function useGetNewsStatus<
-  TData = Awaited<ReturnType<typeof getNewsStatus>>,
-  TError = ErrorType<unknown>,
->(options?: {
-  query?: UseQueryOptions<Awaited<ReturnType<typeof getNewsStatus>>, TError, TData>;
-  request?: SecondParameter<typeof customFetch>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-  const queryKey = queryOptions?.queryKey ?? getGetNewsStatusQueryKey();
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getNewsStatus>>> = ({ signal }) =>
-    getNewsStatus({ signal, ...requestOptions });
-  const query = useQuery({ queryKey, queryFn, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-  return { ...query, queryKey };
 }

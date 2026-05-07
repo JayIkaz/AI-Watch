@@ -69,6 +69,26 @@ paths:
                       $ref: "#/components/schemas/Vendor"
                 required: [vendors]
 
+  /v1/vendors/counts:
+    get:
+      operationId: getVendorCounts
+      tags: [vendors]
+      summary: Get update counts per vendor for a given category
+      parameters:
+        - name: category
+          in: query
+          required: true
+          description: Category slug to filter counts by
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Per-vendor update counts for the category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorCountsResponse"
+
   /v1/vendors/{slug}:
     get:
       operationId: getVendor
@@ -160,6 +180,11 @@ paths:
         - name: flagged
           in: query
           description: Filter by review flag status
+          schema:
+            type: boolean
+        - name: highImpact
+          in: query
+          description: Filter to high-impact updates only
           schema:
             type: boolean
       responses:
@@ -350,6 +375,76 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /v1/news:
+    get:
+      operationId: listNews
+      tags: [updates]
+      summary: List AI news items with optional filters
+      parameters:
+        - name: credibility
+          in: query
+          description: Filter by credibility rating (comma-separated for multiple)
+          schema:
+            type: string
+        - name: highInterest
+          in: query
+          schema:
+            type: boolean
+        - name: keyword
+          in: query
+          schema:
+            type: string
+        - name: vendor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        "200":
+          description: Paginated list of news items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListNewsResponse"
+
+  /v1/news/trigger:
+    post:
+      operationId: triggerNewsIngestion
+      tags: [updates]
+      summary: Manually trigger the news ingestion pipeline
+      responses:
+        "200":
+          description: Ingestion triggered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestionResult"
+
+  /v1/news/status:
+    get:
+      operationId: getNewsStatus
+      tags: [updates]
+      summary: Get news ingestion status
+      responses:
+        "200":
+          description: News pipeline status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsStatus"
+
   /v1/ingestion/trigger:
     post:
       operationId: triggerIngestion
@@ -476,6 +571,97 @@ components:
         message:
           type: string
       required: [error]
+
+    NewsCredibility:
+      type: string
+      enum: [verified, likely, unverified, gossip]
+
+    NewsItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+          nullable: true
+        rawContent:
+          type: string
+          nullable: true
+        sourceUrl:
+          type: string
+          nullable: true
+        sourceName:
+          type: string
+        sourceType:
+          type: string
+          enum: [major-outlet, tech-blog, newsletter, social, forum]
+        credibilityRating:
+          $ref: "#/components/schemas/NewsCredibility"
+        credibilityReason:
+          type: string
+          nullable: true
+        mentionedVendors:
+          type: array
+          items:
+            type: string
+          nullable: true
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        detectedAt:
+          type: string
+          format: date-time
+        highInterest:
+          type: boolean
+        deduplicationHash:
+          type: string
+          nullable: true
+      required: [id, title, sourceName, sourceType, credibilityRating, detectedAt, highInterest]
+
+    ListNewsResponse:
+      type: object
+      properties:
+        news:
+          type: array
+          items:
+            $ref: "#/components/schemas/NewsItem"
+        total:
+          type: integer
+      required: [news, total]
+
+    NewsStatus:
+      type: object
+      properties:
+        isRunning:
+          type: boolean
+        lastRunAt:
+          type: string
+          format: date-time
+          nullable: true
+        totalItems:
+          type: integer
+      required: [isRunning, totalItems]
+
+    VendorCount:
+      type: object
+      properties:
+        slug:
+          type: string
+        count:
+          type: integer
+      required: [slug, count]
+
+    VendorCountsResponse:
+      type: object
+      properties:
+        counts:
+          type: array
+          items:
+            $ref: "#/components/schemas/VendorCount"
+      required: [counts]
 
     Vendor:
       type: object

@@ -1,5 +1,5 @@
 import { keepPreviousData } from "@tanstack/react-query";
-import { useListUpdates, useListVendors, getListUpdatesQueryKey, getListVendorsQueryKey } from "@workspace/api-client-react";
+import { useListUpdates, useListVendors, useGetVendorCounts, getListUpdatesQueryKey, getListVendorsQueryKey, getGetVendorCountsQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
 import { SkeletonUpdateCard } from "@/components/SkeletonCard";
@@ -7,6 +7,8 @@ import { RefreshingBar } from "@/components/RefreshingBar";
 import { DollarSign, Database, Zap, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+
+const CATEGORY = "pricing";
 
 export default function PricingWatch() {
   const [page, setPage] = useState(0);
@@ -17,10 +19,17 @@ export default function PricingWatch() {
 
   const { data: vendorsData } = useListVendors({}, { query: { queryKey: getListVendorsQueryKey({}), staleTime: 5 * 60 * 1000 } });
 
+  const countsParams = { category: CATEGORY };
+  const { data: countsData } = useGetVendorCounts(countsParams, {
+    query: { queryKey: getGetVendorCountsQueryKey(countsParams), staleTime: 5 * 60 * 1000 },
+  });
+
+  const countMap = new Map((countsData?.counts ?? []).map((c) => [c.slug, c.count]));
+
   const vendorParam = selectedVendors.size > 0 ? [...selectedVendors].join(",") : undefined;
 
   const params = {
-    category: "pricing",
+    category: CATEGORY,
     vendor: vendorParam,
     highImpact: highImpactOnly ? true : undefined,
     limit,
@@ -45,6 +54,9 @@ export default function PricingWatch() {
   }
 
   function toggleVendor(slug: string) {
+    const isAlreadySelected = selectedVendors.has(slug);
+    const vendorCount = countsData ? (countMap.get(slug) ?? 0) : undefined;
+    if (!isAlreadySelected && vendorCount === 0 && countsData) return;
     setSelectedVendors((prev) => {
       const next = new Set(prev);
       if (next.has(slug)) {
@@ -119,20 +131,41 @@ export default function PricingWatch() {
           {/* Vendor chips */}
           {vendorsData && vendorsData.vendors.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {vendorsData.vendors.map((v) => (
-                <button
-                  key={v.slug}
-                  onClick={() => toggleVendor(v.slug)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
-                    selectedVendors.has(v.slug)
-                      ? "bg-green-400/15 border-green-400/40 text-green-400"
-                      : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-border/80"
-                  )}
-                >
-                  {v.name}
-                </button>
-              ))}
+              {vendorsData.vendors.map((v) => {
+                const hasCount = countsData !== undefined;
+                const vendorCount = hasCount ? (countMap.get(v.slug) ?? 0) : undefined;
+                const isZero = hasCount && vendorCount === 0;
+                const isSelected = selectedVendors.has(v.slug);
+                return (
+                  <button
+                    key={v.slug}
+                    onClick={() => toggleVendor(v.slug)}
+                    disabled={isZero && !isSelected}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                      isSelected
+                        ? "bg-green-400/15 border-green-400/40 text-green-400"
+                        : isZero
+                        ? "bg-card border-border text-muted-foreground opacity-35 cursor-not-allowed"
+                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-border/80"
+                    )}
+                  >
+                    {v.name}
+                    {hasCount && vendorCount !== undefined && vendorCount > 0 && (
+                      <span
+                        className={cn(
+                          "inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none tabular-nums",
+                          isSelected
+                            ? "bg-green-400/30 text-green-300"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {vendorCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, vendorsTable, updatesTable } from "@workspace/db";
+import { db, vendorsTable, updatesTable, categoriesTable } from "@workspace/db";
 import { eq, count, max, and } from "drizzle-orm";
 
 const router: IRouter = Router();
@@ -54,6 +54,42 @@ router.get("/v1/vendors", async (req, res) => {
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "internal_error", message: "Failed to list vendors" });
+  }
+});
+
+router.get("/v1/vendors/counts", async (req, res) => {
+  try {
+    const { category } = req.query;
+
+    if (!category || typeof category !== "string") {
+      res.status(400).json({ error: "bad_request", message: "category query parameter is required" });
+      return;
+    }
+
+    const [cat] = await db
+      .select({ id: categoriesTable.id })
+      .from(categoriesTable)
+      .where(eq(categoriesTable.slug, category));
+
+    if (!cat) {
+      res.json({ counts: [] });
+      return;
+    }
+
+    const rows = await db
+      .select({
+        slug: vendorsTable.slug,
+        count: count(updatesTable.id),
+      })
+      .from(updatesTable)
+      .innerJoin(vendorsTable, eq(updatesTable.vendorId, vendorsTable.id))
+      .where(eq(updatesTable.categoryId, cat.id))
+      .groupBy(vendorsTable.slug);
+
+    res.json({ counts: rows });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "internal_error", message: "Failed to get vendor counts" });
   }
 });
 

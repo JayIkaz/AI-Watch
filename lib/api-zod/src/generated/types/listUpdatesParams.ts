@@ -34,4 +34,8 @@ export type ListUpdatesParams = {
    * Filter by review flag status
    */
   flagged?: boolean;
+  /**
+   * Filter to high-impact updates only
+   */
+  highImpact?: boolean;
 };

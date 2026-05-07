@@ -55,6 +55,64 @@ export interface ErrorResponse {
   message?: string;
 }
 
+export type NewsCredibility =
+  (typeof NewsCredibility)[keyof typeof NewsCredibility];
+
+export const NewsCredibility = {
+  verified: "verified",
+  likely: "likely",
+  unverified: "unverified",
+  gossip: "gossip",
+} as const;
+
+export type NewsItemSourceType =
+  (typeof NewsItemSourceType)[keyof typeof NewsItemSourceType];
+
+export const NewsItemSourceType = {
+  "major-outlet": "major-outlet",
+  "tech-blog": "tech-blog",
+  newsletter: "newsletter",
+  social: "social",
+  forum: "forum",
+} as const;
+
+export interface NewsItem {
+  id: number;
+  title: string;
+  summary?: string | null;
+  rawContent?: string | null;
+  sourceUrl?: string | null;
+  sourceName: string;
+  sourceType: NewsItemSourceType;
+  credibilityRating: NewsCredibility;
+  credibilityReason?: string | null;
+  mentionedVendors?: string[] | null;
+  publishedAt?: string | null;
+  detectedAt: string;
+  highInterest: boolean;
+  deduplicationHash?: string | null;
+}
+
+export interface ListNewsResponse {
+  news: NewsItem[];
+  total: number;
+}
+
+export interface NewsStatus {
+  isRunning: boolean;
+  lastRunAt?: string | null;
+  totalItems: number;
+}
+
+export interface VendorCount {
+  slug: string;
+  count: number;
+}
+
+export interface VendorCountsResponse {
+  counts: VendorCount[];
+}
+
 export type VendorTier = (typeof VendorTier)[keyof typeof VendorTier];
 
 export const VendorTier = {
@@ -242,6 +300,13 @@ export type ListVendors200 = {
   vendors: Vendor[];
 };
 
+export type GetVendorCountsParams = {
+  /**
+   * Category slug to filter counts by
+   */
+  category: string;
+};
+
 export type ListCategories200 = {
   categories: Category[];
 };
@@ -275,7 +340,7 @@ export type ListUpdatesParams = {
    */
   flagged?: boolean;
   /**
-   * Filter to only high-impact updates
+   * Filter to high-impact updates only
    */
   highImpact?: boolean;
 };
@@ -284,91 +349,21 @@ export type ListApiKeys200 = {
   keys: ApiKeyInfo[];
 };
 
-export type NewsCredibility = "verified" | "likely" | "unverified" | "gossip";
-export type NewsSourceType = "major-outlet" | "tech-blog" | "newsletter" | "social" | "forum";
-
-export type NewsItem = {
-  id: number;
-  title: string;
-  summary: string | null;
-  rawContent: string | null;
-  sourceUrl: string | null;
-  sourceName: string;
-  sourceType: NewsSourceType;
-  credibilityRating: NewsCredibility;
-  credibilityReason: string | null;
-  mentionedVendors: string[];
-  publishedAt: string | null;
-  detectedAt: string;
-  highInterest: boolean;
-  deduplicationHash: string | null;
-};
-
-export type NewsResponse = {
-  news: NewsItem[];
-  total: number;
-};
-
 export type ListNewsParams = {
+  /**
+   * Filter by credibility rating (comma-separated for multiple)
+   */
   credibility?: string;
-  vendor?: string;
   highInterest?: boolean;
   keyword?: string;
+  vendor?: string;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
   limit?: number;
+  /**
+   * @minimum 0
+   */
   offset?: number;
-};
-
-export type TriggerNewsIngestion200 = {
-  started: boolean;
-  message: string;
-};
-
-export type NewsIngestionStatus = {
-  isRunning: boolean;
-  lastRunAt: string | null;
-  totalItems: number;
-};
-
-export type LikeIds = {
-  updateIds: number[];
-  newsIds: number[];
-};
-
-export type LikedUpdate = {
-  id: number;
-  title: string;
-  summary: string | null;
-  sourceUrl: string | null;
-  publishedAt: string | null;
-  detectedAt: string;
-  highImpact: boolean;
-  whyItMatters: string | null;
-  confidenceScore: number | null;
-  flaggedForReview: boolean;
-  vendor: { id: number; name: string; slug: string; logoUrl: string | null } | null;
-  category: { id: number; name: string; slug: string; color: string | null } | null;
-};
-
-export type LikedNews = {
-  id: number;
-  title: string;
-  summary: string | null;
-  sourceUrl: string | null;
-  publishedAt: string | null;
-  detectedAt: string;
-  credibilityRating: NewsCredibility;
-  credibilityReason: string | null;
-  highInterest: boolean;
-  mentionedVendors: string[] | null;
-  sourceName: string;
-  sourceType: string;
-};
-
-export type LikedItems = {
-  updates: LikedUpdate[];
-  news: LikedNews[];
-};
-
-export type LikeResponse = {
-  liked: boolean;
 };
