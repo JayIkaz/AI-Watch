@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 import { useListUpdates, getListUpdatesQueryKey, useListVendors, useListCategories } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
@@ -28,15 +28,80 @@ const SIGNAL_TYPES = [
 ];
 
 export default function Feed() {
-  const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
-  const [activeQuickFilters, setActiveQuickFilters] = useState<Set<QuickFilter>>(new Set());
   const limit = 20;
   const { highImpactOnly, setHighImpactOnly } = useFeedPrefs();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const searchQuery = searchParams.get("q") ?? undefined;
+
+  // On mount: if no filter params in URL, restore last session's filters from sessionStorage.
+  // Also sync URL → context: if qf=high-impact is in URL but context is false, set it true.
+  useEffect(() => {
+    const hasParams = searchParams.get("vendors") || searchParams.get("cats") || searchParams.get("qf");
+    if (!hasParams) {
+      const stored = sessionStorage.getItem("feed-filters");
+      if (stored) {
+        try {
+          const saved = JSON.parse(stored) as Record<string, string>;
+          if (Object.keys(saved).length > 0) {
+            setSearchParams(prev => {
+              const next = new URLSearchParams(prev);
+              Object.entries(saved).forEach(([k, v]) => next.set(k, v));
+              return next;
+            });
+            // Sync high-impact from restored sessionStorage into context
+            if (saved.qf?.split(",").includes("high-impact") && !highImpactOnly) {
+              setHighImpactOnly(true);
+            }
+          }
+        } catch {}
+      }
+    } else {
+      // URL has params — sync qf=high-impact → context if needed
+      const qfList = searchParams.get("qf")?.split(",").filter(Boolean) ?? [];
+      if (qfList.includes("high-impact") && !highImpactOnly) {
+        setHighImpactOnly(true);
+      } else if (!qfList.includes("high-impact") && highImpactOnly) {
+        setHighImpactOnly(false);
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // If highImpactOnly is set in context (via localStorage) but not reflected in URL, add it.
+  // We only ever ADD here — removal is handled by toggleQuickFilter and clearAllFilters.
+  useEffect(() => {
+    if (!highImpactOnly) return;
+    const qfList = searchParams.get("qf")?.split(",").filter(Boolean) ?? [];
+    if (!qfList.includes("high-impact")) {
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        const current = next.get("qf")?.split(",").filter(Boolean) ?? [];
+        if (!current.includes("high-impact")) {
+          next.set("qf", [...current, "high-impact"].join(","));
+        }
+        return next;
+      });
+    }
+  }, [highImpactOnly]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Whenever filter params change, persist them to sessionStorage
+  useEffect(() => {
+    const saved: Record<string, string> = {};
+    ["vendors", "cats", "qf"].forEach(key => {
+      const val = searchParams.get(key);
+      if (val) saved[key] = val;
+    });
+    sessionStorage.setItem("feed-filters", JSON.stringify(saved));
+  }, [searchParams]);
+
+  // Filter state stored in URL params
+  const selectedVendors: string[] = searchParams.get("vendors")?.split(",").filter(Boolean) ?? [];
+  const selectedCategories: string[] = searchParams.get("cats")?.split(",").filter(Boolean) ?? [];
+  const activeQuickFilters = new Set<QuickFilter>(
+    (searchParams.get("qf")?.split(",").filter(Boolean) ?? []) as QuickFilter[]
+  );
 
   const isLast24h = activeQuickFilters.has("last-24h");
   const chipHighImpact = activeQuickFilters.has("high-impact") || highImpactOnly;
@@ -86,38 +151,71 @@ export default function Feed() {
   const { data: vendorsData }       = useListVendors({});
   const { data: categoriesData }    = useListCategories({});
 
+  const updateParam = (updater: (params: URLSearchParams) => void) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      updater(next);
+      return next;
+    });
+    setPage(0);
+  };
+
   const toggleVendor = (slug: string) => {
-    setSelectedVendors(prev => prev.includes(slug) ? prev.filter(v => v !== slug) : [...prev, slug]);
-    setPage(0);
+    updateParam(next => {
+      const current = next.get("vendors")?.split(",").filter(Boolean) ?? [];
+      const updated = current.includes(slug) ? current.filter(v => v !== slug) : [...current, slug];
+      if (updated.length) next.set("vendors", updated.join(","));
+      else next.delete("vendors");
+    });
   };
+
   const toggleCategory = (slug: string) => {
-    setSelectedCategories(prev => prev.includes(slug) ? prev.filter(c => c !== slug) : [...prev, slug]);
-    setPage(0);
+    updateParam(next => {
+      const current = next.get("cats")?.split(",").filter(Boolean) ?? [];
+      const updated = current.includes(slug) ? current.filter(c => c !== slug) : [...current, slug];
+      if (updated.length) next.set("cats", updated.join(","));
+      else next.delete("cats");
+    });
   };
+
   const toggleQuickFilter = (f: QuickFilter) => {
     if (f === "high-impact") {
       setHighImpactOnly(!highImpactOnly);
-      setActiveQuickFilters(prev => {
-        const next = new Set(prev);
-        if (next.has(f)) next.delete(f); else next.add(f);
-        return next;
+      updateParam(next => {
+        const current = next.get("qf")?.split(",").filter(Boolean) ?? [];
+        const updated = current.includes(f) ? current.filter(x => x !== f) : [...current, f];
+        if (updated.length) next.set("qf", updated.join(","));
+        else next.delete("qf");
       });
     } else {
-      setActiveQuickFilters(prev => {
-        const next = new Set(prev);
-        if (next.has(f)) next.delete(f); else next.add(f);
-        return next;
+      updateParam(next => {
+        const current = next.get("qf")?.split(",").filter(Boolean) ?? [];
+        const updated = current.includes(f) ? current.filter(x => x !== f) : [...current, f];
+        if (updated.length) next.set("qf", updated.join(","));
+        else next.delete("qf");
       });
     }
-    setPage(0);
   };
+
   const toggleSignalType = (category?: string) => {
     if (!category) return;
     toggleCategory(category);
   };
 
+  const clearAllFilters = () => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete("vendors");
+      next.delete("cats");
+      next.delete("qf");
+      return next;
+    });
+    setHighImpactOnly(false);
+    setPage(0);
+  };
+
   const visibleUpdates = (updatesData?.updates ?? []).filter(u => !hiddenIds.has(u.id));
-  const hasActiveFilters = selectedVendors.length > 0 || selectedCategories.length > 0 || activeQuickFilters.size > 0;
+  const hasActiveFilters = selectedVendors.length > 0 || selectedCategories.length > 0 || activeQuickFilters.size > 0 || highImpactOnly;
 
   const statCards = [
     { label: "High-impact updates", value: statsHighImpact?.total ?? "—", icon: Zap,         color: "text-primary" },
@@ -178,13 +276,7 @@ export default function Feed() {
             })}
             {hasActiveFilters && (
               <button
-                onClick={() => {
-                  setSelectedVendors([]);
-                  setSelectedCategories([]);
-                  setActiveQuickFilters(new Set());
-                  setHighImpactOnly(false);
-                  setPage(0);
-                }}
+                onClick={clearAllFilters}
                 className="px-3 py-1.5 rounded-full text-xs font-medium border border-border text-muted-foreground hover:text-foreground hover:border-border/80 flex items-center gap-1 transition-all"
               >
                 Clear all <X className="w-3 h-3" />
@@ -228,7 +320,7 @@ export default function Feed() {
               </p>
               {hasActiveFilters && (
                 <button
-                  onClick={() => { setSelectedVendors([]); setSelectedCategories([]); setActiveQuickFilters(new Set()); setHighImpactOnly(false); setPage(0); }}
+                  onClick={clearAllFilters}
                   className="mt-4 px-4 py-2 rounded-xl text-sm font-medium bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
                 >
                   Clear filters
@@ -274,7 +366,7 @@ export default function Feed() {
               Filters
               {hasActiveFilters && (
                 <button
-                  onClick={() => { setSelectedVendors([]); setSelectedCategories([]); setActiveQuickFilters(new Set()); setHighImpactOnly(false); setPage(0); }}
+                  onClick={clearAllFilters}
                   className="ml-auto text-xs font-normal text-muted-foreground hover:text-foreground flex items-center gap-1 bg-secondary px-2 py-1 rounded-md"
                 >
                   Clear all <X className="w-3 h-3" />
@@ -288,17 +380,17 @@ export default function Feed() {
               <div>
                 <h3 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Quick Filter</h3>
                 <button
-                  onClick={() => { setHighImpactOnly(!highImpactOnly); setPage(0); }}
+                  onClick={() => toggleQuickFilter("high-impact")}
                   className={cn(
                     "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all",
-                    highImpactOnly
+                    chipHighImpact
                       ? "bg-primary/10 border-primary/40 text-primary"
                       : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-border/80"
                   )}
                 >
-                  <Zap className={cn("w-4 h-4", highImpactOnly ? "text-primary" : "text-muted-foreground")} />
+                  <Zap className={cn("w-4 h-4", chipHighImpact ? "text-primary" : "text-muted-foreground")} />
                   High-Impact Only
-                  {highImpactOnly && <span className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                  {chipHighImpact && <span className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </button>
               </div>
 

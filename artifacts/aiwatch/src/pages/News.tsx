@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 import { useSearchParams } from "wouter";
 import {
@@ -546,16 +546,57 @@ function NewsScanStatus({ onTrigger, isPending }: { onTrigger: () => void; isPen
 
 // ── Main page ────────────────────────────────────────────────────────────────
 export default function News() {
-  const [selectedRatings, setSelectedRatings] = useState<NewsCredibility[]>([]);
-  const [selectedImpacts, setSelectedImpacts] = useState<ImpactFilter[]>([]);
-  const [highInterestOnly, setHighInterestOnly] = useState(false);
-  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange | null>(null);
   const [page, setPage] = useState(0);
   const limit = 20;
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") ?? undefined;
   const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
   const triggerIngestion = useTriggerNewsIngestion();
+
+  // On mount: if no filter params in URL, restore last session's filters from sessionStorage
+  useEffect(() => {
+    const hasParams = searchParams.get("ratings") || searchParams.get("impacts") || searchParams.get("hi") || searchParams.get("tr");
+    if (!hasParams) {
+      const stored = sessionStorage.getItem("news-filters");
+      if (stored) {
+        try {
+          const saved = JSON.parse(stored) as Record<string, string>;
+          if (Object.keys(saved).length > 0) {
+            setSearchParams(prev => {
+              const next = new URLSearchParams(prev);
+              Object.entries(saved).forEach(([k, v]) => next.set(k, v));
+              return next;
+            });
+          }
+        } catch {}
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Whenever filter params change, persist them to sessionStorage
+  useEffect(() => {
+    const saved: Record<string, string> = {};
+    ["ratings", "impacts", "hi", "tr"].forEach(key => {
+      const val = searchParams.get(key);
+      if (val) saved[key] = val;
+    });
+    sessionStorage.setItem("news-filters", JSON.stringify(saved));
+  }, [searchParams]);
+
+  // Filter state stored in URL params for persistence across navigation
+  const selectedRatings: NewsCredibility[] = (searchParams.get("ratings")?.split(",").filter(Boolean) ?? []) as NewsCredibility[];
+  const selectedImpacts: ImpactFilter[] = (searchParams.get("impacts")?.split(",").filter(Boolean) ?? []) as ImpactFilter[];
+  const highInterestOnly = searchParams.get("hi") === "1";
+  const selectedTimeRange = (searchParams.get("tr") as TimeRange) || null;
+
+  const updateParam = (updater: (params: URLSearchParams) => void) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      updater(next);
+      return next;
+    });
+    setPage(0);
+  };
 
   const { data, isLoading, isError: isErrorNews } = useListNews(
     {
@@ -576,25 +617,39 @@ export default function News() {
   );
 
   const toggleRating = (r: NewsCredibility) => {
-    setSelectedRatings(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]);
-    setPage(0);
+    updateParam(next => {
+      const current = next.get("ratings")?.split(",").filter(Boolean) ?? [];
+      const updated = current.includes(r) ? current.filter(x => x !== r) : [...current, r];
+      if (updated.length) next.set("ratings", updated.join(","));
+      else next.delete("ratings");
+    });
   };
 
   const toggleImpact = (i: ImpactFilter) => {
-    setSelectedImpacts(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
-    setPage(0);
+    updateParam(next => {
+      const current = next.get("impacts")?.split(",").filter(Boolean) ?? [];
+      const updated = current.includes(i) ? current.filter(x => x !== i) : [...current, i];
+      if (updated.length) next.set("impacts", updated.join(","));
+      else next.delete("impacts");
+    });
   };
 
   const toggleTimeRange = (t: TimeRange) => {
-    setSelectedTimeRange(prev => prev === t ? null : t);
-    setPage(0);
+    updateParam(next => {
+      if (next.get("tr") === t) next.delete("tr");
+      else next.set("tr", t);
+    });
   };
 
   const clearAllFilters = () => {
-    setSelectedRatings([]);
-    setSelectedImpacts([]);
-    setHighInterestOnly(false);
-    setSelectedTimeRange(null);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete("ratings");
+      next.delete("impacts");
+      next.delete("hi");
+      next.delete("tr");
+      return next;
+    });
     setPage(0);
   };
 
@@ -648,7 +703,7 @@ export default function News() {
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               {/* High interest */}
               <button
-                onClick={() => { setHighInterestOnly(!highInterestOnly); setPage(0); }}
+                onClick={() => updateParam(next => { if (next.get("hi") === "1") next.delete("hi"); else next.set("hi", "1"); })}
                 className={cn(
                   "flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
                   highInterestOnly
@@ -755,13 +810,13 @@ export default function News() {
                 </button>
               ))}
               {highInterestOnly && (
-                <button onClick={() => setHighInterestOnly(false)}
+                <button onClick={() => updateParam(next => next.delete("hi"))}
                   className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium text-amber-400 bg-amber-400/10 border-amber-400/30">
                   High Interest Only ×
                 </button>
               )}
               {selectedTimeRange && (
-                <button onClick={() => setSelectedTimeRange(null)}
+                <button onClick={() => updateParam(next => next.delete("tr"))}
                   className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium text-muted-foreground bg-secondary border-border">
                   Last {selectedTimeRange} ×
                 </button>
@@ -851,7 +906,7 @@ export default function News() {
               {/* High interest */}
               <div className="mb-5">
                 <button
-                  onClick={() => { setHighInterestOnly(!highInterestOnly); setPage(0); }}
+                  onClick={() => updateParam(next => { if (next.get("hi") === "1") next.delete("hi"); else next.set("hi", "1"); })}
                   className={cn(
                     "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all",
                     highInterestOnly
