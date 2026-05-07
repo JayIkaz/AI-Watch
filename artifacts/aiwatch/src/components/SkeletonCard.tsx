@@ -104,3 +104,56 @@ export function SkeletonNewsCard() {
     </div>
   );
 }
+
+export function SkeletonVendorCard() {
+  return (
+    <div className="h-full bg-card rounded-2xl border border-border p-6">
+      <div className="flex items-start justify-between mb-4">
+        <Shimmer className="w-12 h-12 rounded-xl" />
+        <Shimmer className="h-5 w-14 rounded-full" />
+      </div>
+      <Shimmer className="h-5 w-32 mb-2" />
+      <Shimmer className="h-3.5 w-full mb-1" />
+      <Shimmer className="h-3.5 w-4/5 mb-4" />
+      <div className="pt-4 border-t border-border/50">
+        <Shimmer className="h-3.5 w-20" />
+      </div>
+    </div>
+  );
+}
+
+export function SkeletonCategoryCard() {
+  return (
+    <div className="h-full bg-card rounded-2xl border border-border p-6">
+      <div className="flex items-center justify-between mb-4">
+        <Shimmer className="w-10 h-10 rounded-xl" />
+        <Shimmer className="h-6 w-16 rounded-full" />
+      </div>
+      <Shimmer className="h-6 w-36 mb-2" />
+      <Shimmer className="h-3.5 w-full mb-1" />
+      <Shimmer className="h-3.5 w-3/4" />
+    </div>
+  );
+}
+
+export function SkeletonVendorDetailHeader() {
+  return (
+    <div className="bg-card border border-border rounded-3xl p-8 mb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+        <Shimmer className="w-24 h-24 rounded-2xl shrink-0" />
+        <div className="flex-1 min-w-0 space-y-3">
+          <div className="flex items-center gap-3">
+            <Shimmer className="h-8 w-48" />
+            <Shimmer className="h-6 w-16 rounded-full" />
+          </div>
+          <Shimmer className="h-4 w-full max-w-lg" />
+          <Shimmer className="h-4 w-3/4 max-w-md" />
+          <div className="flex items-center gap-4 pt-1">
+            <Shimmer className="h-4 w-32" />
+            <Shimmer className="h-4 w-28" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

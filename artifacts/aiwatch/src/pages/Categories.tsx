@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Link } from "wouter";
 import { Layers, Activity } from "lucide-react";
 import { cn, getCategoryColor } from "@/lib/utils";
+import { SkeletonCategoryCard } from "@/components/SkeletonCard";
 
 export default function Categories() {
   const { data: categoriesData, isLoading } = useListCategories({});
@@ -16,8 +17,8 @@ export default function Categories() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-32 rounded-2xl bg-card border border-border animate-pulse" />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCategoryCard key={i} />
           ))}
         </div>
       ) : (

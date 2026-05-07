@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Link } from "wouter";
 import { Cpu, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SkeletonVendorCard } from "@/components/SkeletonCard";
 
 export default function Vendors() {
   const { data: vendorsData, isLoading } = useListVendors({});
@@ -16,8 +17,8 @@ export default function Vendors() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-            <div key={i} className="h-48 rounded-2xl bg-card border border-border animate-pulse" />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonVendorCard key={i} />
           ))}
         </div>
       ) : (

@@ -2,6 +2,7 @@ import { useParams } from "wouter";
 import { useGetVendor, useListUpdates, getListUpdatesQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
+import { SkeletonVendorDetailHeader, SkeletonUpdateCard } from "@/components/SkeletonCard";
 import { Cpu, ExternalLink, Activity, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 
@@ -16,12 +17,13 @@ export default function VendorDetail() {
   if (isLoadingVendor) {
     return (
       <Layout>
-        <div className="animate-pulse space-y-8">
-          <div className="h-32 bg-card rounded-2xl" />
-          <div className="space-y-4">
-            <div className="h-40 bg-card rounded-2xl" />
-            <div className="h-40 bg-card rounded-2xl" />
-          </div>
+        <div className="mb-6 h-5 w-28 rounded-md bg-muted/40 animate-pulse" />
+        <SkeletonVendorDetailHeader />
+        <div className="space-y-6">
+          <div className="h-7 w-64 rounded-md bg-muted/40 animate-pulse border-b border-border pb-4" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonUpdateCard key={i} />
+          ))}
         </div>
       </Layout>
     );
@@ -74,7 +76,11 @@ export default function VendorDetail() {
       <div className="space-y-6">
         <h2 className="text-xl font-display font-bold text-foreground border-b border-border pb-4">Intelligence Feed for {vendor.name}</h2>
         {isLoadingUpdates ? (
-          <div className="text-center text-muted-foreground py-10">Loading updates...</div>
+          <div className="space-y-5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonUpdateCard key={i} />
+            ))}
+          </div>
         ) : updatesData?.updates.length === 0 ? (
           <div className="text-center text-muted-foreground py-10">No updates found for this vendor.</div>
         ) : (
