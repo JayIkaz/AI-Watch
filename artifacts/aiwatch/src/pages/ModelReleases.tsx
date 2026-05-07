@@ -11,15 +11,17 @@ import { cn } from "@/lib/utils";
 export default function ModelReleases() {
   const [page, setPage] = useState(0);
   const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
-  const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
+  const [selectedVendors, setSelectedVendors] = useState<Set<string>>(new Set());
   const [highImpactOnly, setHighImpactOnly] = useState(false);
   const limit = 20;
 
   const { data: vendorsData } = useListVendors({}, { query: { queryKey: getListVendorsQueryKey({}), staleTime: 5 * 60 * 1000 } });
 
+  const vendorParam = selectedVendors.size > 0 ? [...selectedVendors].join(",") : undefined;
+
   const params = {
     category: "model-release",
-    vendor: selectedVendor ?? undefined,
+    vendor: vendorParam,
     highImpact: highImpactOnly ? true : undefined,
     limit,
     offset: page * limit,
@@ -34,18 +36,33 @@ export default function ModelReleases() {
   });
 
   const visible = (data?.updates ?? []).filter((u) => !hiddenIds.has(u.id));
-  const hasFilters = selectedVendor !== null || highImpactOnly;
+  const hasFilters = selectedVendors.size > 0 || highImpactOnly;
 
   function resetFilters() {
-    setSelectedVendor(null);
+    setSelectedVendors(new Set());
     setHighImpactOnly(false);
     setPage(0);
   }
 
-  function selectVendor(slug: string) {
-    setSelectedVendor((prev) => (prev === slug ? null : slug));
+  function toggleVendor(slug: string) {
+    setSelectedVendors((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) {
+        next.delete(slug);
+      } else {
+        next.add(slug);
+      }
+      return next;
+    });
     setPage(0);
   }
+
+  const vendorLabel =
+    selectedVendors.size === 0
+      ? null
+      : selectedVendors.size === 1
+      ? null
+      : `${selectedVendors.size} vendors`;
 
   return (
     <Layout>
@@ -70,7 +87,7 @@ export default function ModelReleases() {
 
         {/* Filters */}
         <div className="mb-6 space-y-3">
-          {/* High impact toggle */}
+          {/* High impact toggle + clear */}
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => { setHighImpactOnly((v) => !v); setPage(0); }}
@@ -84,6 +101,11 @@ export default function ModelReleases() {
               <Zap className="w-3.5 h-3.5" />
               High Impact Only
             </button>
+            {vendorLabel && (
+              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-400/15 border border-blue-400/40 text-blue-400">
+                {vendorLabel}
+              </span>
+            )}
             {hasFilters && (
               <button
                 onClick={resetFilters}
@@ -100,10 +122,10 @@ export default function ModelReleases() {
               {vendorsData.vendors.map((v) => (
                 <button
                   key={v.slug}
-                  onClick={() => selectVendor(v.slug)}
+                  onClick={() => toggleVendor(v.slug)}
                   className={cn(
                     "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
-                    selectedVendor === v.slug
+                    selectedVendors.has(v.slug)
                       ? "bg-blue-400/15 border-blue-400/40 text-blue-400"
                       : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-border/80"
                   )}
