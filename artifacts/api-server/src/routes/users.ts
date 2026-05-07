@@ -6,7 +6,7 @@ const router: IRouter = Router();
 
 router.get("/auth/me", async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ error: "unauthorized", message: "Not authenticated" });
+    res.json(null);
     return;
   }
 

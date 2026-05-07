@@ -45,7 +45,7 @@ export default function Login() {
             
             <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/50 border border-white/5 text-sm text-muted-foreground mt-6">
               <ShieldAlert className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <p>Secure access via OpenID Connect. Authorized personnel only.</p>
+              <p>Sign in to save preferences, create alerts, and access your personalised feed.</p>
             </div>
           </div>
           

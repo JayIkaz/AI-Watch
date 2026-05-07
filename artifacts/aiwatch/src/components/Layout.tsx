@@ -48,7 +48,7 @@ interface SidebarContentProps {
   ingestionStatus: { isRunning: boolean } | undefined;
   onTriggerIngestion: () => void;
   isTriggerPending: boolean;
-  user: { profileImageUrl?: string | null; username?: string | null; displayName?: string | null } | undefined;
+  user: { profileImageUrl?: string | null; username?: string | null; displayName?: string | null } | null | undefined;
 }
 
 function SidebarContent({
@@ -177,21 +177,30 @@ function SidebarContent({
           </div>
         )}
 
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background border border-border">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border shrink-0">
-            {user?.profileImageUrl ? (
-              <img src={user.profileImageUrl} alt={user.username || "User"} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-xs font-bold text-muted-foreground">
-                {(user?.displayName || user?.username || "U").charAt(0).toUpperCase()}
-              </span>
-            )}
+        {user ? (
+          <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background border border-border">
+            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border shrink-0">
+              {user.profileImageUrl ? (
+                <img src={user.profileImageUrl} alt={user.username || "User"} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs font-bold text-muted-foreground">
+                  {(user.displayName || user.username || "U").charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-foreground truncate">{user.displayName || user.username}</div>
+              <div className="text-xs text-muted-foreground truncate">Replit Account</div>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-foreground truncate">{user?.displayName || user?.username}</div>
-            <div className="text-xs text-muted-foreground truncate">Replit Account</div>
-          </div>
-        </div>
+        ) : (
+          <a
+            href="/api/login?returnTo=/"
+            className="flex items-center justify-center w-full py-2 px-4 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+          >
+            Sign in
+          </a>
+        )}
       </div>
     </>
   );
@@ -276,19 +285,6 @@ export function Layout({ children }: LayoutProps) {
       ],
     },
   ];
-
-  if (isLoadingUser) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    window.location.href = "/login";
-    return null;
-  }
 
   const sidebarProps = {
     inputValue,
