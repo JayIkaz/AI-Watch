@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   ExternalLink, Newspaper, RefreshCw, CheckCircle,
   HelpCircle, MessageCircle, Zap, Building2, Heart, Search,
-  ChevronDown, ChevronUp, Eye, EyeOff, Share2, BookmarkPlus,
+  ChevronDown, ChevronUp, Eye, Share2, BookmarkPlus,
   Bell, AlertCircle, ShieldCheck, Radio, Clock, Database,
   TrendingUp, BarChart3, List, X,
 } from "lucide-react";
@@ -156,7 +156,7 @@ function getMockAlsoSeen(id: number): string[] {
 }
 
 // ── NewsCard ──────────────────────────────────────────────────────────────────
-function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
+function NewsCard({ item }: { item: NewsItem }) {
   const cfg = CREDIBILITY_CONFIG[item.credibilityRating];
   const impact = deriveImpact(item);
   const impactCfg = IMPACT_CONFIG[impact];
@@ -167,11 +167,8 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
   const liked = isLiked("news", item.id);
   const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const alsoSeen = getMockAlsoSeen(item.id);
   const Icon = cfg.icon;
-
-  if (hidden) return null;
 
   const timeAgo = item.publishedAt
     ? formatDistanceToNow(new Date(item.publishedAt), { addSuffix: true })
@@ -406,15 +403,6 @@ function NewsCard({ item, onHide }: { item: NewsItem; onHide: () => void }) {
               <Bell className="w-4 h-4" />
             </button>
 
-            {/* Hide */}
-            <button
-              onClick={() => setHidden(true)}
-              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
-              title="Hide"
-            >
-              <EyeOff className="w-4 h-4" />
-            </button>
-
             {/* Source */}
             {item.sourceUrl && (
               <a
@@ -551,7 +539,6 @@ export default function News() {
   const limit = 20;
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") ?? undefined;
-  const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
   const triggerIngestion = useTriggerNewsIngestion();
 
   // On mount: if no filter params in URL, restore last session's filters from sessionStorage
@@ -666,7 +653,6 @@ export default function News() {
     : null;
 
   const filteredNews = (data?.news ?? []).filter(item => {
-    if (hiddenIds.has(item.id)) return false;
     if (selectedImpacts.length > 0 && !selectedImpacts.includes(deriveImpact(item))) return false;
     if (cutoffDate) {
       const itemDate = new Date(item.publishedAt ?? item.detectedAt);
@@ -862,7 +848,6 @@ export default function News() {
                 <NewsCard
                   key={item.id}
                   item={item}
-                  onHide={() => setHiddenIds(s => new Set([...s, item.id]))}
                 />
               ))}
               <div className="pt-8 flex items-center justify-between border-t border-border">

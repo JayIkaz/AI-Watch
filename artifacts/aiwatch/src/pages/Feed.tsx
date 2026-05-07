@@ -30,7 +30,6 @@ const SIGNAL_TYPES = [
 
 export default function Feed() {
   const [page, setPage] = useState(0);
-  const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
   const limit = 20;
   const { highImpactOnly, setHighImpactOnly } = useFeedPrefs();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -215,7 +214,7 @@ export default function Feed() {
     setPage(0);
   };
 
-  const visibleUpdates = (updatesData?.updates ?? []).filter(u => !hiddenIds.has(u.id));
+  const visibleUpdates = updatesData?.updates ?? [];
   const hasActiveFilters = selectedVendors.length > 0 || selectedCategories.length > 0 || activeQuickFilters.size > 0 || highImpactOnly;
 
   const statCards = [
@@ -337,7 +336,6 @@ export default function Feed() {
                 <UpdateCard
                   key={update.id}
                   update={update}
-                  onHide={() => setHiddenIds(prev => new Set([...prev, update.id]))}
                 />
               ))}
 

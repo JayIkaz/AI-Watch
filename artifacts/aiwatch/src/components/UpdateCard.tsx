@@ -3,7 +3,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
 import {
   ExternalLink, Cpu, CheckCircle2, AlertTriangle, Heart,
-  ShieldAlert, EyeOff, ThumbsUp, ThumbsDown, Bell, Zap,
+  ShieldAlert, ThumbsUp, ThumbsDown, Bell, Zap,
   ChevronDown, ChevronUp, Users
 } from "lucide-react";
 import { cn, getCategoryColor } from "@/lib/utils";
@@ -14,7 +14,6 @@ import { useState } from "react";
 
 interface UpdateCardProps {
   update: Update;
-  onHide?: () => void;
 }
 
 function getCredibilityBadge(update: Update) {
@@ -60,7 +59,7 @@ function getAudience(slug: string): string[] {
   return map[slug] || ["Developers"];
 }
 
-export function UpdateCard({ update, onHide }: UpdateCardProps) {
+export function UpdateCard({ update }: UpdateCardProps) {
   const { density } = useFeedPrefs();
   const compact = density === "compact";
   const { isLiked, toggle } = useLikes();
@@ -259,17 +258,6 @@ export function UpdateCard({ update, onHide }: UpdateCardProps) {
           >
             <Heart className={cn("w-4 h-4 transition-transform", liked && "fill-current scale-110")} />
           </button>
-
-          {/* Hide */}
-          {onHide && (
-            <button
-              onClick={onHide}
-              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
-              title="Hide this update"
-            >
-              <EyeOff className="w-4 h-4" />
-            </button>
-          )}
 
           {/* More like this */}
           <button

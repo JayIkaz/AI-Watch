@@ -12,7 +12,6 @@ const CATEGORY = "model-release";
 
 export default function ModelReleases() {
   const [page, setPage] = useState(0);
-  const [hiddenIds, setHiddenIds] = useState<Set<number>>(new Set());
   const [selectedVendors, setSelectedVendors] = useState<Set<string>>(new Set());
   const [highImpactOnly, setHighImpactOnly] = useState(false);
   const limit = 20;
@@ -44,7 +43,7 @@ export default function ModelReleases() {
     },
   });
 
-  const visible = (data?.updates ?? []).filter((u) => !hiddenIds.has(u.id));
+  const visible = data?.updates ?? [];
   const hasFilters = selectedVendors.size > 0 || highImpactOnly;
 
   function resetFilters() {
@@ -206,7 +205,6 @@ export default function ModelReleases() {
               <UpdateCard
                 key={u.id}
                 update={u}
-                onHide={() => setHiddenIds((p) => new Set([...p, u.id]))}
               />
             ))}
             <div className="pt-8 flex items-center justify-between border-t border-border">
