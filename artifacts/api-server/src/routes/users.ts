@@ -24,7 +24,13 @@ router.get("/auth/me", async (req, res) => {
 
 router.get("/v1/users/preferences", async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ error: "unauthorized", message: "Not authenticated" });
+    res.json({
+      vendorSlugs: [],
+      categorySlugs: [],
+      digestFrequency: "none",
+      alertKeywords: [],
+      emailAlerts: false,
+    });
     return;
   }
 
@@ -63,7 +69,14 @@ router.get("/v1/users/preferences", async (req, res) => {
 
 router.put("/v1/users/preferences", async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ error: "unauthorized", message: "Not authenticated" });
+    const { vendorSlugs, categorySlugs, digestFrequency, alertKeywords, emailAlerts } = req.body;
+    res.json({
+      vendorSlugs: vendorSlugs ?? [],
+      categorySlugs: categorySlugs ?? [],
+      digestFrequency: digestFrequency ?? "none",
+      alertKeywords: alertKeywords ?? [],
+      emailAlerts: emailAlerts ?? false,
+    });
     return;
   }
 

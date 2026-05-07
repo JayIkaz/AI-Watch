@@ -5,13 +5,13 @@ import { z } from "zod/v4";
 
 const router = Router();
 
-function requireAuth(req: any, res: any, next: any) {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: "Unauthorized" });
-  next();
-}
-
 // GET /v1/likes — return liked IDs for the current user
-router.get("/v1/likes", requireAuth, async (req: any, res) => {
+router.get("/v1/likes", async (req: any, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    res.json({ updateIds: [], newsIds: [] });
+    return;
+  }
+
   try {
     const rows = await db
       .select({ itemType: userLikesTable.itemType, itemId: userLikesTable.itemId })
@@ -28,7 +28,12 @@ router.get("/v1/likes", requireAuth, async (req: any, res) => {
 });
 
 // GET /v1/likes/items — return full liked items
-router.get("/v1/likes/items", requireAuth, async (req: any, res) => {
+router.get("/v1/likes/items", async (req: any, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    res.json({ updates: [], news: [] });
+    return;
+  }
+
   try {
     const rows = await db
       .select({ itemType: userLikesTable.itemType, itemId: userLikesTable.itemId, createdAt: userLikesTable.createdAt })
@@ -112,7 +117,12 @@ const likeBodySchema = z.object({
 });
 
 // POST /v1/likes — like an item
-router.post("/v1/likes", requireAuth, async (req: any, res) => {
+router.post("/v1/likes", async (req: any, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    res.json({ liked: true, guest: true });
+    return;
+  }
+
   const parsed = likeBodySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid body" });
 
@@ -129,7 +139,12 @@ router.post("/v1/likes", requireAuth, async (req: any, res) => {
 });
 
 // DELETE /v1/likes/:itemType/:itemId — unlike an item
-router.delete("/v1/likes/:itemType/:itemId", requireAuth, async (req: any, res) => {
+router.delete("/v1/likes/:itemType/:itemId", async (req: any, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    res.json({ liked: false, guest: true });
+    return;
+  }
+
   const itemType = req.params.itemType as "update" | "news";
   const itemId = parseInt(req.params.itemId, 10);
 

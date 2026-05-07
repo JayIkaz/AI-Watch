@@ -11,7 +11,7 @@ function hashKey(key: string): string {
 
 router.get("/v1/apikeys", async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ error: "unauthorized", message: "Not authenticated" });
+    res.json({ keys: [] });
     return;
   }
 
@@ -42,7 +42,7 @@ router.get("/v1/apikeys", async (req, res) => {
 
 router.post("/v1/apikeys", async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ error: "unauthorized", message: "Not authenticated" });
+    res.status(200).json({ error: "sign_in_required", message: "Sign in to create API keys" });
     return;
   }
 
@@ -85,7 +85,7 @@ router.post("/v1/apikeys", async (req, res) => {
 
 router.delete("/v1/apikeys/:id", async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.status(401).json({ error: "unauthorized", message: "Not authenticated" });
+    res.json({ deleted: false, guest: true });
     return;
   }
 
