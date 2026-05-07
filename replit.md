@@ -1,5 +1,9 @@
 # AIWatch — Unified AI Update Intelligence Platform
 
+## User Preferences
+
+- Always notify the user when changes require republishing the app to take effect in production.
+
 ## Overview
 
 pnpm workspace monorepo using TypeScript. AIWatch aggregates news, model releases, API changes, and pricing updates from 20+ major AI vendors into a single feed with AI-powered (Claude) classification, summarization, Replit Auth, API key management, and an ingestion pipeline.
