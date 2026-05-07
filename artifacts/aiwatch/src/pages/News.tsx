@@ -12,6 +12,7 @@ import {
 import { Layout } from "@/components/Layout";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { SkeletonNewsCard } from "@/components/SkeletonCard";
+import { RefreshingBar } from "@/components/RefreshingBar";
 import { useLikes } from "@/contexts/LikesContext";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -598,7 +599,7 @@ export default function News() {
     setPage(0);
   };
 
-  const { data, isLoading, isError: isErrorNews } = useListNews(
+  const { data, isLoading, isFetching, isError: isErrorNews } = useListNews(
     {
       credibility: selectedRatings.length > 0 ? selectedRatings.join(",") : undefined,
       highInterest: highInterestOnly ? true : undefined,
@@ -611,7 +612,7 @@ export default function News() {
         queryKey: ["/api/v1/news", selectedRatings.join(","), highInterestOnly, page, searchQuery],
         refetchInterval: 30000,
         placeholderData: keepPreviousData,
-        staleTime: 2 * 60 * 1000,
+        staleTime: 5 * 60 * 1000,
       },
     }
   );
@@ -786,6 +787,9 @@ export default function News() {
               )}
             </div>
           </div>
+
+          {/* Background refresh indicator */}
+          <RefreshingBar visible={isFetching && !isLoading} />
 
           {searchQuery && (
             <div className="mb-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm text-primary">

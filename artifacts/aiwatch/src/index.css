@@ -101,6 +101,16 @@
   }
 }
 
+@keyframes refreshing {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(160%); }
+  100% { transform: translateX(160%); }
+}
+
+.animate-refreshing {
+  animation: refreshing 1.4s ease-in-out infinite;
+}
+
 @layer utilities {
   .glass-panel {
     @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/50;

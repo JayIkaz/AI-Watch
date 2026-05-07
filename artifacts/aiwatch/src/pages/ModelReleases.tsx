@@ -1,7 +1,10 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { useListUpdates, useListVendors, getListUpdatesQueryKey, getListVendorsQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
-import { Loader2, Cpu, Database, Zap, X } from "lucide-react";
+import { SkeletonUpdateCard } from "@/components/SkeletonCard";
+import { RefreshingBar } from "@/components/RefreshingBar";
+import { Cpu, Database, Zap, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -22,10 +25,11 @@ export default function ModelReleases() {
     offset: page * limit,
   };
 
-  const { data, isLoading } = useListUpdates(params, {
+  const { data, isLoading, isFetching } = useListUpdates(params, {
     query: {
       queryKey: getListUpdatesQueryKey(params),
       staleTime: 5 * 60 * 1000,
+      placeholderData: keepPreviousData,
     },
   });
 
@@ -111,11 +115,15 @@ export default function ModelReleases() {
           )}
         </div>
 
+        {/* Background refresh indicator */}
+        <RefreshingBar visible={isFetching && !isLoading} />
+
         {/* Feed */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-            <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
-            <p>Loading model releases...</p>
+          <div className="space-y-5">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonUpdateCard key={i} />
+            ))}
           </div>
         ) : visible.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card/30 border border-dashed border-border rounded-3xl">

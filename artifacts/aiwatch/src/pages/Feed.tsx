@@ -4,6 +4,7 @@ import { useListUpdates, getListUpdatesQueryKey, useListVendors, useListCategori
 import { Layout } from "@/components/Layout";
 import { UpdateCard } from "@/components/UpdateCard";
 import { SkeletonUpdateCard } from "@/components/SkeletonCard";
+import { RefreshingBar } from "@/components/RefreshingBar";
 import { Filter, X, Database, CheckCircle2, Zap, Search, TrendingUp, DollarSign, Cpu, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
@@ -121,7 +122,7 @@ export default function Feed() {
     ? new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     : undefined;
 
-  const { data: updatesData, isLoading: isLoadingUpdates, isError: isErrorUpdates } = useListUpdates(
+  const { data: updatesData, isLoading: isLoadingUpdates, isFetching: isFetchingUpdates, isError: isErrorUpdates } = useListUpdates(
     {
       vendor:     selectedVendors.join(",") || undefined,
       category:   effectiveCategories.join(",") || undefined,
@@ -140,7 +141,7 @@ export default function Feed() {
           page, chipHighImpact, searchQuery, date24hAgo,
         ],
         placeholderData: keepPreviousData,
-        staleTime: 2 * 60 * 1000,
+        staleTime: 5 * 60 * 1000,
       },
     }
   );
@@ -283,6 +284,9 @@ export default function Feed() {
               </button>
             )}
           </div>
+
+          {/* Background refresh indicator */}
+          <RefreshingBar visible={isFetchingUpdates && !isLoadingUpdates} />
 
           {/* Search indicator */}
           {searchQuery && (
