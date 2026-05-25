@@ -23,7 +23,7 @@ import {
   useGetNewsStatus,
   getGetNewsStatusQueryKey,
 } from "@workspace/api-client-react";
-import { cn } from "@/lib/utils";
+import { cn, decodeHtml } from "@/lib/utils";
 
 const LS_KEY = "aiwatch_last_notification_view";
 
@@ -166,7 +166,7 @@ export function NotificationBell() {
                   <NotifItem
                     key={u.id}
                     dot="amber"
-                    title={u.title}
+                    title={decodeHtml(u.title)}
                     meta={[
                       u.vendor.name,
                       u.category.name,
@@ -193,7 +193,7 @@ export function NotificationBell() {
                   <NotifItem
                     key={item.id}
                     dot="blue"
-                    title={item.title}
+                    title={decodeHtml(item.title)}
                     meta={[
                       item.sourceName,
                       item.publishedAt

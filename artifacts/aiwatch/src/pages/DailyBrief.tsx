@@ -2,7 +2,7 @@ import { useListUpdates, getListUpdatesQueryKey } from "@workspace/api-client-re
 import { Layout } from "@/components/Layout";
 import { Loader2, Zap, BookOpen, ExternalLink, ShieldAlert, ArrowRight, DollarSign, Cpu, Code2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { cn, getCategoryColor } from "@/lib/utils";
+import { cn, getCategoryColor, decodeHtml } from "@/lib/utils";
 import { Link } from "wouter";
 
 function getRecommendedAction(slug: string): string {
@@ -155,7 +155,7 @@ export default function DailyBrief() {
 
                       {/* Headline */}
                       <h2 className="text-base font-display font-bold text-foreground mb-2 leading-snug">
-                        {item.title}
+                        {decodeHtml(item.title)}
                       </h2>
 
                       {/* Why it matters */}

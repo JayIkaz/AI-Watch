@@ -23,7 +23,7 @@ import {
   TrendingUp, BarChart3, List, X,
 } from "lucide-react";
 import { formatDistanceToNow, subHours, subDays } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, decodeHtml } from "@/lib/utils";
 
 // ── Credibility config (renamed labels per spec) ─────────────────────────────
 const CREDIBILITY_CONFIG: Record<NewsCredibility, {
@@ -222,14 +222,14 @@ function NewsCard({ item }: { item: NewsItem }) {
 
         {/* Title */}
         <h3 className="text-base md:text-lg font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
-          {item.title}
+          {decodeHtml(item.title)}
         </h3>
 
         {/* What happened */}
         {item.summary && (
           <div>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">What happened</p>
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{item.summary}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{decodeHtml(item.summary)}</p>
           </div>
         )}
 

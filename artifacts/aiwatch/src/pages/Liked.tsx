@@ -6,7 +6,7 @@ import { UpdateCard } from "@/components/UpdateCard";
 import type { LikedItems, LikedNews, Update } from "@workspace/api-client-react";
 import { Heart, Loader2, Newspaper, Activity, ExternalLink, Building2, Zap } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, decodeHtml } from "@/lib/utils";
 import { Link } from "wouter";
 
 type Tab = "updates" | "news";
@@ -51,12 +51,12 @@ function LikedNewsCard({ item }: { item: LikedNews }) {
       </div>
 
       <h3 className="text-base font-display font-bold text-foreground mb-2 leading-snug group-hover:text-primary transition-colors">
-        {item.title}
+        {decodeHtml(item.title)}
       </h3>
 
       {item.summary && (
         <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-3">
-          {item.summary}
+          {decodeHtml(item.summary)}
         </p>
       )}
 

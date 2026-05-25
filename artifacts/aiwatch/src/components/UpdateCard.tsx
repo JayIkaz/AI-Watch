@@ -6,7 +6,7 @@ import {
   ShieldAlert, ThumbsUp, ThumbsDown, Bell, Zap,
   ChevronDown, ChevronUp, Users
 } from "lucide-react";
-import { cn, getCategoryColor } from "@/lib/utils";
+import { cn, getCategoryColor, decodeHtml } from "@/lib/utils";
 import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
 import { useLikes } from "@/contexts/LikesContext";
 import { useToast } from "@/hooks/use-toast";
@@ -137,7 +137,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
         "font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug",
         compact ? "text-base mb-2" : "text-lg md:text-xl mb-2"
       )}>
-        {update.title}
+        {decodeHtml(update.title)}
       </h3>
 
       {/* Summary */}
@@ -146,7 +146,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
           "text-muted-foreground leading-relaxed",
           compact ? "text-xs mb-2 line-clamp-2" : "text-sm mb-3 line-clamp-2"
         )}>
-          {update.summary}
+          {decodeHtml(update.summary)}
         </p>
       )}
 
