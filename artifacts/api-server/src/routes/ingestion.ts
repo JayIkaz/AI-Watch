@@ -194,6 +194,7 @@ async function runIngestionForSource(sourceId: number, vendorId: number): Promis
 
         created++;
       } catch (itemErr) {
+        console.error("[ingestion] item error:", String(itemErr));
         errors++;
       }
     }
@@ -283,7 +284,7 @@ async function runFullIngestion(vendorSlugs?: string[]) {
 }
 
 router.post("/v1/ingestion/trigger", async (req, res) => {
-  const { vendorSlugs } = req.body as { vendorSlugs?: string[] };
+  const { vendorSlugs } = (req.body ?? {}) as { vendorSlugs?: string[] };
 
   if (isIngestionRunning) {
     res.json({ started: false, message: "Ingestion already running", jobId: null });
