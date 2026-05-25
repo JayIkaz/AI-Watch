@@ -15,6 +15,50 @@ const KNOWN_AI_VENDORS = [
   "Together AI", "Claude", "GPT", "Gemini", "Llama", "Grok",
 ];
 
+function ruleBasedClassifyNews(title: string, content: string, sourceName: string, sourceType: string): {
+  summary: string;
+  credibilityRating: "verified" | "likely" | "unverified" | "gossip";
+  credibilityReason: string;
+  mentionedVendors: string[];
+  highInterest: boolean;
+} {
+  const text = `${title} ${content}`.toLowerCase();
+
+  const credibilityMap: Record<string, "verified" | "likely" | "unverified" | "gossip"> = {
+    "official": "verified",
+    "techcrunch": "likely",
+    "venturebeat": "likely",
+    "wired": "verified",
+    "reuters": "verified",
+    "bloomberg": "verified",
+    "mit technology review": "likely",
+    "the verge": "likely",
+    "ars technica": "likely",
+  };
+
+  const sourceKey = sourceName.toLowerCase();
+  let credibilityRating: "verified" | "likely" | "unverified" | "gossip" = "unverified";
+  for (const [key, rating] of Object.entries(credibilityMap)) {
+    if (sourceKey.includes(key)) { credibilityRating = rating; break; }
+  }
+  if (sourceType === "social") credibilityRating = "gossip";
+  if (sourceType === "official") credibilityRating = "verified";
+
+  const mentionedVendors = KNOWN_AI_VENDORS.filter(v => text.includes(v.toLowerCase()));
+  const highInterest = /funding|acqui|billion|million|regulat|ban|lawsuit|ceo|resign|fired|controversy/.test(text);
+  const summary = content.length > 20
+    ? content.substring(0, 350).replace(/\s+/g, " ").trim()
+    : title;
+
+  return {
+    summary,
+    credibilityRating,
+    credibilityReason: `Source: ${sourceName} (${sourceType})`,
+    mentionedVendors,
+    highInterest,
+  };
+}
+
 async function classifyNewsItem(title: string, content: string, sourceName: string, sourceType: string): Promise<{
   summary: string;
   credibilityRating: "verified" | "likely" | "unverified" | "gossip";
@@ -149,12 +193,17 @@ async function runNewsIngestion() {
           if (existing) continue;
 
           try {
-            const classification = await classifyNewsItem(
-              item.title,
-              item.content,
-              source.name,
-              source.sourceType,
-            );
+            let classification;
+            try {
+              classification = await classifyNewsItem(
+                item.title,
+                item.content,
+                source.name,
+                source.sourceType,
+              );
+            } catch {
+              classification = ruleBasedClassifyNews(item.title, item.content, source.name, source.sourceType);
+            }
 
             await db.insert(newsItemsTable).values({
               title: item.title,

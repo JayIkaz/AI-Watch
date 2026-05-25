@@ -8,6 +8,49 @@ const router: IRouter = Router();
 
 let isIngestionRunning = false;
 
+function ruleBasedClassify(title: string, content: string, sourceUrl: string): {
+  categorySlug: string;
+  summary: string;
+  whyItMatters: string | null;
+  confidence: number;
+  highImpact: boolean;
+} {
+  const text = `${title} ${content} ${sourceUrl}`.toLowerCase();
+
+  let categorySlug = "product";
+  let highImpact = false;
+  let confidence = 0.6;
+
+  if (/\bmodel\b|release|gpt-|claude-|gemini|llama|mistral|grok|haiku|sonnet|opus|version \d|\bv\d+\.\d+/.test(text)) {
+    categorySlug = "model-release";
+    highImpact = true;
+    confidence = 0.72;
+  } else if (/api|endpoint|deprecat|sdk|parameter|token limit|rate limit|changelog/.test(text)) {
+    categorySlug = "api-changelog";
+    confidence = 0.71;
+  } else if (/pric|cost|credit|billing|tier|free|subscription|\$\d/.test(text)) {
+    categorySlug = "pricing";
+    highImpact = true;
+    confidence = 0.75;
+  } else if (/safety|policy|harm|abuse|guideline|responsible|alignment/.test(text)) {
+    categorySlug = "safety";
+    confidence = 0.70;
+  } else if (/research|paper|arxiv|benchmark|evaluat|study|dataset/.test(text)) {
+    categorySlug = "research";
+    confidence = 0.70;
+  }
+
+  const summary = content.length > 20
+    ? content.substring(0, 400).replace(/\s+/g, " ").trim()
+    : title;
+
+  const whyItMatters = highImpact
+    ? `This is a significant update from the AI vendor that may affect your workflows.`
+    : null;
+
+  return { categorySlug, summary, whyItMatters, confidence, highImpact };
+}
+
 async function classifyAndSummarize(title: string, content: string, sourceUrl: string): Promise<{
   categorySlug: string;
   summary: string;
@@ -57,6 +100,21 @@ Respond with JSON only:
     confidence: parsed.confidence ?? 0.5,
     highImpact: parsed.highImpact ?? false,
   };
+}
+
+async function classifyAndSummarizeWithFallback(title: string, content: string, sourceUrl: string): Promise<{
+  categorySlug: string;
+  summary: string;
+  whyItMatters: string | null;
+  confidence: number;
+  highImpact: boolean;
+}> {
+  try {
+    return await classifyAndSummarize(title, content, sourceUrl);
+  } catch (err) {
+    console.warn("[ingestion] Claude unavailable, using rule-based classifier:", String(err).substring(0, 80));
+    return ruleBasedClassify(title, content, sourceUrl);
+  }
 }
 
 async function fetchAndParseRSS(url: string): Promise<Array<{
@@ -143,7 +201,7 @@ async function runIngestionForSource(sourceId: number, vendorId: number): Promis
 
         if (existing) continue;
 
-        const { categorySlug, summary, whyItMatters, confidence, highImpact } = await classifyAndSummarize(
+        const { categorySlug, summary, whyItMatters, confidence, highImpact } = await classifyAndSummarizeWithFallback(
           item.title,
           item.content,
           item.sourceUrl
