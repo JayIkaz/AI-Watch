@@ -117,6 +117,26 @@ async function classifyAndSummarizeWithFallback(title: string, content: string, 
   }
 }
 
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#0*39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&nbsp;/g, " ")
+    .replace(/&rsquo;/g, "\u2019")
+    .replace(/&lsquo;/g, "\u2018")
+    .replace(/&rdquo;/g, "\u201D")
+    .replace(/&ldquo;/g, "\u201C")
+    .replace(/&mdash;/g, "\u2014")
+    .replace(/&ndash;/g, "\u2013")
+    .replace(/&hellip;/g, "\u2026");
+}
+
 async function fetchAndParseRSS(url: string): Promise<Array<{
   title: string;
   content: string;
@@ -142,9 +162,9 @@ async function fetchAndParseRSS(url: string): Promise<Array<{
     const descMatch = item.match(/<description[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/description>|<description[^>]*>([\s\S]*?)<\/description>/i);
     const pubDateMatch = item.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i);
 
-    const title = (titleMatch?.[1] ?? titleMatch?.[2] ?? "").trim();
+    const title = decodeHtmlEntities((titleMatch?.[1] ?? titleMatch?.[2] ?? "").trim());
     const link = (linkMatch?.[1] ?? "").trim();
-    const desc = (descMatch?.[1] ?? descMatch?.[2] ?? "").replace(/<[^>]+>/g, " ").trim();
+    const desc = decodeHtmlEntities((descMatch?.[1] ?? descMatch?.[2] ?? "").replace(/<[^>]+>/g, " ").trim());
     const pubDate = pubDateMatch ? new Date(pubDateMatch[1].trim()) : null;
 
     if (title && link) {
@@ -162,9 +182,9 @@ async function fetchAndParseRSS(url: string): Promise<Array<{
       const summaryMatch = entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
       const publishedMatch = entry.match(/<published[^>]*>([\s\S]*?)<\/published>|<updated[^>]*>([\s\S]*?)<\/updated>/i);
 
-      const title = (titleMatch?.[1] ?? "").replace(/<[^>]+>/g, "").trim();
+      const title = decodeHtmlEntities((titleMatch?.[1] ?? "").replace(/<[^>]+>/g, "").trim());
       const link = (linkMatch?.[1] ?? "").trim();
-      const summary = (summaryMatch?.[1] ?? "").replace(/<[^>]+>/g, " ").trim();
+      const summary = decodeHtmlEntities((summaryMatch?.[1] ?? "").replace(/<[^>]+>/g, " ").trim());
       const pubDate = publishedMatch ? new Date((publishedMatch[1] ?? publishedMatch[2]).trim()) : null;
 
       if (title && link) {
