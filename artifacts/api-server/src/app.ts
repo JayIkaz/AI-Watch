@@ -31,10 +31,10 @@ const allowedOrigins = [
   ...DEFAULT_ALLOWED_ORIGINS,
   ...(process.env.ALLOWED_ORIGINS?.split(",").map((o) => o.trim()).filter(Boolean) ?? []),
 ];
-// TODO(phase-6): once the frontend's Vercel project exists, confirm its exact
-// preview-URL pattern (e.g. https://aiwatch-<hash>-<team>.vercel.app) and add
-// it here as a regex — do not guess it before the project is live.
-const allowedOriginPatterns: RegExp[] = [];
+// Vercel preview/branch deployments for the aiwatch frontend project, e.g.
+// https://ai-watch-aiwatch-git-supabase-migration-aukizan.vercel.app or
+// https://ai-watch-aiwatch-<hash>-aukizan.vercel.app.
+const allowedOriginPatterns: RegExp[] = [/^https:\/\/ai-watch-aiwatch-[a-z0-9-]+-aukizan\.vercel\.app$/];
 
 app.use(cors({
   // No cookies involved (auth is a Bearer token in the Authorization header,
@@ -44,7 +44,9 @@ app.use(cors({
       callback(null, true);
       return;
     }
-    callback(new Error(`Origin not allowed: ${origin}`));
+    // Reject without throwing — an Error passed to this callback propagates
+    // as an unhandled exception (bare 500), not a clean CORS rejection.
+    callback(null, false);
   },
 }));
 app.use(express.json());
