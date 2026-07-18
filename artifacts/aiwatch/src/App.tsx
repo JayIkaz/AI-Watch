@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { FeedPrefsProvider } from "@/contexts/FeedPrefsContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { LikesProvider } from "@/contexts/LikesContext";
 import Feed from "./pages/Feed";
 import Vendors from "./pages/Vendors";
@@ -57,6 +58,7 @@ function App() {
     <ThemeProvider>
       <FeedPrefsProvider>
         <QueryClientProvider client={queryClient}>
+          <AuthProvider>
           <LikesProvider>
           <TooltipProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -65,6 +67,7 @@ function App() {
             <Toaster />
           </TooltipProvider>
           </LikesProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </FeedPrefsProvider>
     </ThemeProvider>

@@ -3,11 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { useLikes, LIKED_ITEMS_QK } from "@/contexts/LikesContext";
 import { UpdateCard } from "@/components/UpdateCard";
-import type { LikedItems, LikedNews, Update } from "@workspace/api-client-react";
+import type { Update } from "@workspace/api-client-react";
+import type { LikedItems, LikedNews } from "@/lib/likesTypes";
 import { Heart, Loader2, Newspaper, Activity, ExternalLink, Building2, Zap } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn, decodeHtml } from "@/lib/utils";
 import { Link } from "wouter";
+import { supabase } from "@/lib/supabaseClient";
+
+async function authHeaders(): Promise<HeadersInit> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { authorization: `Bearer ${token}` } : {};
+}
 
 type Tab = "updates" | "news";
 
@@ -97,7 +105,7 @@ export default function Liked() {
   const { data, isLoading } = useQuery<LikedItems>({
     queryKey: LIKED_ITEMS_QK,
     queryFn: async ({ signal }) => {
-      const res = await fetch("/api/v1/likes/items", { signal, credentials: "include" });
+      const res = await fetch("/api/v1/likes/items", { signal, headers: await authHeaders() });
       if (!res.ok) throw new Error("Failed to load liked items");
       return res.json();
     },

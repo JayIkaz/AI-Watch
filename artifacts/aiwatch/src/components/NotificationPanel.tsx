@@ -225,7 +225,7 @@ function ScanStatusSection({
   newsStatus,
 }: {
   ingestionStatus?: { isRunning: boolean; lastRunAt?: string | null; lastRunItemsProcessed: number };
-  newsStatus?: { isRunning: boolean; lastRunAt: string | null; totalItems: number };
+  newsStatus?: { isRunning: boolean; lastRunAt?: string | null; totalItems: number };
 }) {
   if (!ingestionStatus && !newsStatus) return null;
 
@@ -247,7 +247,7 @@ function ScanStatusSection({
         <StatusRow
           label="News scan"
           isRunning={newsStatus.isRunning}
-          lastRunAt={newsStatus.lastRunAt}
+          lastRunAt={newsStatus.lastRunAt ?? null}
           totalItems={newsStatus.totalItems}
           itemLabel="news items"
         />

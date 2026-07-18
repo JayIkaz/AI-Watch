@@ -19,6 +19,7 @@ import {
 import { useGetMe, getGetMeQueryKey, useGetIngestionStatus, getGetIngestionStatusQueryKey, useTriggerIngestion } from "@workspace/api-client-react";
 import { NotificationBell } from "./NotificationPanel";
 import { OfflineBanner } from "./OfflineBanner";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -64,6 +65,8 @@ function SidebarContent({
   isTriggerPending,
   user,
 }: SidebarContentProps) {
+  const { signIn, signOut } = useAuth();
+
   return (
     <>
       {/* Logo */}
@@ -178,7 +181,12 @@ function SidebarContent({
         )}
 
         {user ? (
-          <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background border border-border">
+          <button
+            type="button"
+            onClick={() => signOut()}
+            title="Sign out"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background border border-border w-full text-left hover:border-primary/30 transition-colors"
+          >
             <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border shrink-0">
               {user.profileImageUrl ? (
                 <img src={user.profileImageUrl} alt={user.username || "User"} className="w-full h-full object-cover" />
@@ -190,16 +198,17 @@ function SidebarContent({
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-foreground truncate">{user.displayName || user.username}</div>
-              <div className="text-xs text-muted-foreground truncate">Replit Account</div>
+              <div className="text-xs text-muted-foreground truncate">Sign out</div>
             </div>
-          </div>
+          </button>
         ) : (
-          <a
-            href="/api/login?returnTo=/"
+          <button
+            type="button"
+            onClick={() => signIn()}
             className="flex items-center justify-center w-full py-2 px-4 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
           >
             Sign in
-          </a>
+          </button>
         )}
       </div>
     </>

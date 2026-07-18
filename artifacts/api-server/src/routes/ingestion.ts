@@ -1,379 +1,29 @@
 import { Router, type IRouter } from "express";
-import { db, ingestionRunsTable, ingestionSourcesTable, vendorsTable, updatesTable, categoriesTable } from "@workspace/db";
+import { db, ingestionRunsTable, ingestionSourcesTable } from "@workspace/db";
 import { desc, eq, sql } from "drizzle-orm";
-import { anthropic } from "@workspace/integrations-anthropic-ai";
-import crypto from "crypto";
+import { runFullIngestion, withAdvisoryLock, isLockHeld, VENDOR_INGESTION_LOCK_KEY } from "@workspace/ingestion";
+import { requireAdmin } from "../middlewares/requireAdmin";
+import { adminTriggerRateLimit } from "../middlewares/rateLimit";
 
 const router: IRouter = Router();
 
-let isIngestionRunning = false;
-
-function ruleBasedClassify(title: string, content: string, sourceUrl: string): {
-  categorySlug: string;
-  summary: string;
-  whyItMatters: string | null;
-  confidence: number;
-  highImpact: boolean;
-} {
-  const text = `${title} ${content} ${sourceUrl}`.toLowerCase();
-
-  let categorySlug = "product";
-  let highImpact = false;
-  let confidence = 0.6;
-
-  if (/\bmodel\b|release|gpt-|claude-|gemini|llama|mistral|grok|haiku|sonnet|opus|version \d|\bv\d+\.\d+/.test(text)) {
-    categorySlug = "model-release";
-    highImpact = true;
-    confidence = 0.72;
-  } else if (/api|endpoint|deprecat|sdk|parameter|token limit|rate limit|changelog/.test(text)) {
-    categorySlug = "api-changelog";
-    confidence = 0.71;
-  } else if (/pric|cost|credit|billing|tier|free|subscription|\$\d/.test(text)) {
-    categorySlug = "pricing";
-    highImpact = true;
-    confidence = 0.75;
-  } else if (/safety|policy|harm|abuse|guideline|responsible|alignment/.test(text)) {
-    categorySlug = "safety";
-    confidence = 0.70;
-  } else if (/research|paper|arxiv|benchmark|evaluat|study|dataset/.test(text)) {
-    categorySlug = "research";
-    confidence = 0.70;
-  }
-
-  const summary = content.length > 20
-    ? content.substring(0, 400).replace(/\s+/g, " ").trim()
-    : title;
-
-  const whyItMatters = highImpact
-    ? `This is a significant update from the AI vendor that may affect your workflows.`
-    : null;
-
-  return { categorySlug, summary, whyItMatters, confidence, highImpact };
-}
-
-async function classifyAndSummarize(title: string, content: string, sourceUrl: string): Promise<{
-  categorySlug: string;
-  summary: string;
-  whyItMatters: string | null;
-  confidence: number;
-  highImpact: boolean;
-}> {
-  const prompt = `You are classifying an AI product update. Given the following update, classify it into one of these categories and summarize it.
-
-Categories:
-- model-release: New model versions, capability upgrades, benchmark results
-- api-changelog: Endpoint changes, deprecations, new parameters, SDK updates
-- pricing: Rate changes, new tiers, free tier adjustments, credit changes
-- safety: Usage policy updates, safety research, responsible AI announcements
-- research: Papers, technical blog posts, research previews
-- product: New features, partnerships, product launches
-
-Update Title: ${title}
-Source URL: ${sourceUrl}
-Content (truncated): ${content.substring(0, 2000)}
-
-Respond with JSON only:
-{
-  "category": "<one of the category slugs above>",
-  "confidence": <0.0-1.0>,
-  "summary": "<2-4 sentence plain English summary stating what changed, for which product, and why it matters>",
-  "whyItMatters": "<one sentence for high-impact updates (model releases, pricing), or null>",
-  "highImpact": <true/false>,
-  "reasoning": "<brief reasoning>"
-}`;
-
-  const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 8192,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const text = response.content[0].type === "text" ? response.content[0].text : "";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("No JSON in response");
-
-  const parsed = JSON.parse(jsonMatch[0]);
-  return {
-    categorySlug: parsed.category ?? "product",
-    summary: parsed.summary ?? "",
-    whyItMatters: parsed.whyItMatters ?? null,
-    confidence: parsed.confidence ?? 0.5,
-    highImpact: parsed.highImpact ?? false,
-  };
-}
-
-async function classifyAndSummarizeWithFallback(title: string, content: string, sourceUrl: string): Promise<{
-  categorySlug: string;
-  summary: string;
-  whyItMatters: string | null;
-  confidence: number;
-  highImpact: boolean;
-}> {
-  try {
-    return await classifyAndSummarize(title, content, sourceUrl);
-  } catch (err) {
-    console.warn("[ingestion] Claude unavailable, using rule-based classifier:", String(err).substring(0, 80));
-    return ruleBasedClassify(title, content, sourceUrl);
-  }
-}
-
-function decodeHtmlEntities(str: string): string {
-  return str
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#0*39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&nbsp;/g, " ")
-    .replace(/&rsquo;/g, "\u2019")
-    .replace(/&lsquo;/g, "\u2018")
-    .replace(/&rdquo;/g, "\u201D")
-    .replace(/&ldquo;/g, "\u201C")
-    .replace(/&mdash;/g, "\u2014")
-    .replace(/&ndash;/g, "\u2013")
-    .replace(/&hellip;/g, "\u2026");
-}
-
-async function fetchAndParseRSS(url: string): Promise<Array<{
-  title: string;
-  content: string;
-  sourceUrl: string;
-  publishedAt: Date | null;
-}>> {
-  const response = await fetch(url, {
-    headers: { "User-Agent": "AIWatch/1.0 RSS Reader" },
-    signal: AbortSignal.timeout(30000),
-  });
-
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-  const text = await response.text();
-  const items: Array<{ title: string; content: string; sourceUrl: string; publishedAt: Date | null }> = [];
-
-  // Simple RSS/Atom parser using regex
-  const itemMatches = text.matchAll(/<item[^>]*>([\s\S]*?)<\/item>/gi);
-  for (const match of itemMatches) {
-    const item = match[1];
-    const titleMatch = item.match(/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>|<title[^>]*>([\s\S]*?)<\/title>/i);
-    const linkMatch = item.match(/<link[^>]*>([\s\S]*?)<\/link>/i);
-    const descMatch = item.match(/<description[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/description>|<description[^>]*>([\s\S]*?)<\/description>/i);
-    const pubDateMatch = item.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i);
-
-    const title = decodeHtmlEntities((titleMatch?.[1] ?? titleMatch?.[2] ?? "").trim());
-    const link = (linkMatch?.[1] ?? "").trim();
-    const desc = decodeHtmlEntities((descMatch?.[1] ?? descMatch?.[2] ?? "").replace(/<[^>]+>/g, " ").trim());
-    const pubDate = pubDateMatch ? new Date(pubDateMatch[1].trim()) : null;
-
-    if (title && link) {
-      items.push({ title, content: desc, sourceUrl: link, publishedAt: pubDate });
-    }
-  }
-
-  // Also try Atom format
-  if (items.length === 0) {
-    const entryMatches = text.matchAll(/<entry[^>]*>([\s\S]*?)<\/entry>/gi);
-    for (const match of entryMatches) {
-      const entry = match[1];
-      const titleMatch = entry.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-      const linkMatch = entry.match(/<link[^>]*href="([^"]+)"/i);
-      const summaryMatch = entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
-      const publishedMatch = entry.match(/<published[^>]*>([\s\S]*?)<\/published>|<updated[^>]*>([\s\S]*?)<\/updated>/i);
-
-      const title = decodeHtmlEntities((titleMatch?.[1] ?? "").replace(/<[^>]+>/g, "").trim());
-      const link = (linkMatch?.[1] ?? "").trim();
-      const summary = decodeHtmlEntities((summaryMatch?.[1] ?? "").replace(/<[^>]+>/g, " ").trim());
-      const pubDate = publishedMatch ? new Date((publishedMatch[1] ?? publishedMatch[2]).trim()) : null;
-
-      if (title && link) {
-        items.push({ title, content: summary, sourceUrl: link, publishedAt: pubDate });
-      }
-    }
-  }
-
-  return items.slice(0, 20); // Process at most 20 items per source
-}
-
-async function runIngestionForSource(sourceId: number, vendorId: number): Promise<{ created: number; errors: number }> {
-  const [source] = await db.select().from(ingestionSourcesTable).where(eq(ingestionSourcesTable.id, sourceId));
-  if (!source) return { created: 0, errors: 0 };
-
-  let created = 0;
-  let errors = 0;
-
-  try {
-    const items = await fetchAndParseRSS(source.url);
-
-    for (const item of items) {
-      try {
-        const hash = crypto
-          .createHash("sha256")
-          .update(`${vendorId}:${item.sourceUrl}`)
-          .digest("hex");
-
-        // Check for dedup
-        const [existing] = await db
-          .select({ id: updatesTable.id })
-          .from(updatesTable)
-          .where(eq(updatesTable.deduplicationHash, hash));
-
-        if (existing) continue;
-
-        const { categorySlug, summary, whyItMatters, confidence, highImpact } = await classifyAndSummarizeWithFallback(
-          item.title,
-          item.content,
-          item.sourceUrl
-        );
-
-        let [category] = await db
-          .select()
-          .from(categoriesTable)
-          .where(eq(categoriesTable.slug, categorySlug));
-
-        if (!category) {
-          [category] = await db.select().from(categoriesTable).where(eq(categoriesTable.slug, "product"));
-        }
-
-        if (!category) continue;
-
-        if (confidence < 0.70) {
-          await db.insert(updatesTable).values({
-            title: item.title,
-            summary,
-            rawContent: item.content,
-            sourceUrl: item.sourceUrl,
-            publishedAt: item.publishedAt,
-            vendorId,
-            categoryId: category.id,
-            confidenceScore: confidence,
-            flaggedForReview: true,
-            highImpact,
-            whyItMatters,
-            deduplicationHash: hash,
-          });
-        } else {
-          await db.insert(updatesTable).values({
-            title: item.title,
-            summary,
-            rawContent: item.content,
-            sourceUrl: item.sourceUrl,
-            publishedAt: item.publishedAt,
-            vendorId,
-            categoryId: category.id,
-            confidenceScore: confidence,
-            flaggedForReview: false,
-            highImpact,
-            whyItMatters,
-            deduplicationHash: hash,
-          });
-        }
-
-        created++;
-      } catch (itemErr) {
-        console.error("[ingestion] item error:", String(itemErr));
-        errors++;
-      }
-    }
-
-    await db
-      .update(ingestionSourcesTable)
-      .set({ lastCheckedAt: new Date(), lastSuccessAt: new Date() })
-      .where(eq(ingestionSourcesTable.id, sourceId));
-  } catch (err) {
-    errors++;
-    await db
-      .update(ingestionSourcesTable)
-      .set({
-        lastCheckedAt: new Date(),
-        lastErrorAt: new Date(),
-        lastError: String(err),
-      })
-      .where(eq(ingestionSourcesTable.id, sourceId));
-  }
-
-  return { created, errors };
-}
-
-async function runFullIngestion(vendorSlugs?: string[]) {
-  if (isIngestionRunning) return;
-  isIngestionRunning = true;
-
-  const [run] = await db.insert(ingestionRunsTable).values({
-    status: "running",
-    itemsProcessed: 0,
-    itemsCreated: 0,
-    errors: 0,
-  }).returning();
-
-  let totalProcessed = 0;
-  let totalCreated = 0;
-  let totalErrors = 0;
-
-  try {
-    let sources = await db
-      .select({
-        source: ingestionSourcesTable,
-        vendorId: ingestionSourcesTable.vendorId,
-      })
-      .from(ingestionSourcesTable)
-      .leftJoin(vendorsTable, eq(ingestionSourcesTable.vendorId, vendorsTable.id))
-      .where(eq(ingestionSourcesTable.active, true));
-
-    if (vendorSlugs && vendorSlugs.length > 0) {
-      sources = sources.filter(async (s) => {
-        const [v] = await db.select().from(vendorsTable).where(eq(vendorsTable.id, s.vendorId));
-        return v && vendorSlugs.includes(v.slug);
-      });
-    }
-
-    for (const { source } of sources) {
-      const { created, errors } = await runIngestionForSource(source.id, source.vendorId);
-      totalProcessed += created + errors;
-      totalCreated += created;
-      totalErrors += errors;
-    }
-
-    await db
-      .update(ingestionRunsTable)
-      .set({
-        completedAt: new Date(),
-        status: "completed",
-        itemsProcessed: totalProcessed,
-        itemsCreated: totalCreated,
-        errors: totalErrors,
-      })
-      .where(eq(ingestionRunsTable.id, run.id));
-  } catch (err) {
-    await db
-      .update(ingestionRunsTable)
-      .set({
-        completedAt: new Date(),
-        status: "failed",
-        itemsProcessed: totalProcessed,
-        itemsCreated: totalCreated,
-        errors: totalErrors + 1,
-      })
-      .where(eq(ingestionRunsTable.id, run.id));
-  } finally {
-    isIngestionRunning = false;
-  }
-}
-
-router.post("/v1/ingestion/trigger", async (req, res) => {
+router.post("/v1/ingestion/trigger", requireAdmin, adminTriggerRateLimit, async (req, res) => {
   const { vendorSlugs } = (req.body ?? {}) as { vendorSlugs?: string[] };
 
-  if (isIngestionRunning) {
-    res.json({ started: false, message: "Ingestion already running", jobId: null });
+  if (await isLockHeld(VENDOR_INGESTION_LOCK_KEY)) {
+    res.json({ started: false, message: "Ingestion already running" });
     return;
   }
 
-  const jobId = crypto.randomBytes(8).toString("hex");
-  // Run in background
-  setImmediate(() => runFullIngestion(vendorSlugs).catch(console.error));
+  // Run in background; the advisory lock (acquired inside withAdvisoryLock)
+  // is what actually prevents overlap, not this response.
+  setImmediate(() => {
+    withAdvisoryLock(VENDOR_INGESTION_LOCK_KEY, () => runFullIngestion(vendorSlugs)).catch((err) => {
+      req.log.error(err, "Manual vendor ingestion trigger failed");
+    });
+  });
 
-  res.json({ started: true, message: "Ingestion started", jobId });
+  res.json({ started: true, message: "Ingestion started" });
 });
 
 router.get("/v1/ingestion/status", async (req, res) => {
@@ -390,7 +40,7 @@ router.get("/v1/ingestion/status", async (req, res) => {
       .where(eq(ingestionSourcesTable.active, true));
 
     res.json({
-      isRunning: isIngestionRunning,
+      isRunning: await isLockHeld(VENDOR_INGESTION_LOCK_KEY),
       lastRunAt: lastRun?.startedAt ?? null,
       lastRunItemsProcessed: lastRun?.itemsProcessed ?? 0,
       lastRunErrors: lastRun?.errors ?? 0,
@@ -402,5 +52,4 @@ router.get("/v1/ingestion/status", async (req, res) => {
   }
 });
 
-export { runFullIngestion };
 export default router;
