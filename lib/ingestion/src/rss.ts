@@ -1,4 +1,10 @@
-import Parser from "rss-parser";
+import * as RssParserModule from "rss-parser";
+
+// rss-parser is a CJS `export =` module. Under some bundlers' TS resolution
+// (seen on Vercel's build, not reproduced locally) a plain default import
+// resolves to the whole module namespace instead of the constructor —
+// this works regardless of which shape comes through.
+const Parser = (RssParserModule as unknown as { default?: typeof RssParserModule }).default ?? RssParserModule;
 
 export interface FeedItem {
   title: string;

@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 
 // In-memory store — best-effort only across multiple serverless instances /
 // cold starts. Acceptable here: this only guards low-traffic admin routes
