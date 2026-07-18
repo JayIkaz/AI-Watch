@@ -1,9 +1,22 @@
 import { Anthropic } from "@anthropic-ai/sdk";
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  throw new Error("ANTHROPIC_API_KEY must be set.");
+let client: Anthropic | null = null;
+
+function getClient(): Anthropic {
+  if (!client) {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY must be set.");
+    }
+    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return client;
 }
 
-export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+// Lazy: constructing (and validating ANTHROPIC_API_KEY) only happens on
+// first actual use, not at import time — so routes/processes that never
+// touch Claude classification can still boot without the key configured.
+export const anthropic = new Proxy({} as Anthropic, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getClient(), prop, receiver);
+  },
 });
