@@ -10,20 +10,20 @@ const router: IRouter = Router();
 router.post("/v1/ingestion/trigger", requireAdmin, adminTriggerRateLimit, async (req, res) => {
   const { vendorSlugs } = (req.body ?? {}) as { vendorSlugs?: string[] };
 
-  if (await isLockHeld(VENDOR_INGESTION_LOCK_KEY)) {
+  // Awaited, not fire-and-forget: Vercel serverless functions stop executing
+  // once the response is sent, so a background setImmediate() never actually
+  // runs there (confirmed — it silently no-ops). The primary ingestion path
+  // is the GitHub Actions cron, which runs as a real process with no such
+  // constraint; this endpoint is just the on-demand admin convenience path,
+  // so waiting for completion here is acceptable.
+  const outcome = await withAdvisoryLock(VENDOR_INGESTION_LOCK_KEY, () => runFullIngestion(vendorSlugs));
+
+  if (outcome.skipped) {
     res.json({ started: false, message: "Ingestion already running" });
     return;
   }
 
-  // Run in background; the advisory lock (acquired inside withAdvisoryLock)
-  // is what actually prevents overlap, not this response.
-  setImmediate(() => {
-    withAdvisoryLock(VENDOR_INGESTION_LOCK_KEY, () => runFullIngestion(vendorSlugs)).catch((err) => {
-      req.log.error(err, "Manual vendor ingestion trigger failed");
-    });
-  });
-
-  res.json({ started: true, message: "Ingestion started" });
+  res.json({ started: true, message: "Ingestion complete", result: outcome.result });
 });
 
 router.get("/v1/ingestion/status", async (req, res) => {

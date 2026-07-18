@@ -65,18 +65,15 @@ router.get("/v1/news", async (req, res) => {
 });
 
 router.post("/v1/news/trigger", requireAdmin, adminTriggerRateLimit, async (req, res) => {
-  if (await isLockHeld(NEWS_INGESTION_LOCK_KEY)) {
+  // Awaited, not fire-and-forget — see routes/ingestion.ts for why.
+  const outcome = await withAdvisoryLock(NEWS_INGESTION_LOCK_KEY, () => runNewsIngestion());
+
+  if (outcome.skipped) {
     res.json({ started: false, message: "News ingestion already running" });
     return;
   }
 
-  setImmediate(() => {
-    withAdvisoryLock(NEWS_INGESTION_LOCK_KEY, () => runNewsIngestion()).catch((err) => {
-      req.log.error(err, "Manual news ingestion trigger failed");
-    });
-  });
-
-  res.json({ started: true, message: "News ingestion started" });
+  res.json({ started: true, message: "News ingestion complete", result: outcome.result });
 });
 
 router.get("/v1/news/status", async (req, res) => {

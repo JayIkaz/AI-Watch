@@ -11,13 +11,24 @@
 --      users/sessions before this backfill runs would destroy the email
 --      values this join depends on.
 
--- Match on email: `users.email` was unique on the old Replit table, and
--- Supabase Auth also enforces a unique email per user.
+-- Match on email, case-insensitively: `users.email` was unique on the old
+-- Replit table (but not normalized to lowercase), and Supabase Auth also
+-- enforces a unique email per user (normalized to lowercase on signup) —
+-- OAuth providers commonly return a different case than what was stored.
 INSERT INTO user_id_mapping (old_user_id, new_user_id)
 SELECT u.id, au.id
 FROM users u
-JOIN auth.users au ON au.email = u.email
+JOIN auth.users au ON LOWER(au.email) = LOWER(u.email)
 ON CONFLICT (old_user_id) DO NOTHING;
+
+-- If the new-auth user already has a user_preferences row (e.g. from using
+-- the app before this backfill ran), the UPDATE below would collide with
+-- the primary key. Drop the newer row in favor of the pre-existing one,
+-- which is what the backfill is trying to preserve.
+DELETE FROM user_preferences up
+USING user_id_mapping m
+WHERE up.user_id = m.new_user_id::text
+  AND EXISTS (SELECT 1 FROM user_preferences WHERE user_id = m.old_user_id);
 
 UPDATE api_keys
 SET user_id = m.new_user_id::text

@@ -7,6 +7,10 @@ import { authMiddleware } from "./middlewares/authMiddleware";
 
 const app: Express = express();
 
+// Running behind Vercel's proxy — trust its X-Forwarded-For so express-rate-limit
+// (and req.ip generally) sees the real client IP instead of refusing to start.
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
