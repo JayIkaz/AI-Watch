@@ -28,8 +28,8 @@ export function OfflineBanner() {
       className={cn(
         "flex items-center gap-3 px-4 py-2.5 text-sm border-b",
         isApiOnly
-          ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-          : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+          ? "bg-amber/10 border-amber/20 text-amber"
+          : "bg-raspberry/10 border-raspberry/20 text-raspberry"
       )}
     >
       {isApiOnly ? (

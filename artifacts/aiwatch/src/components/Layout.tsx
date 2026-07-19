@@ -68,7 +68,7 @@ function SidebarContent({
     <>
       {/* Logo */}
       <div className="p-6 flex items-center gap-3 shrink-0">
-        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-[0_0_15px_rgba(0,240,255,0.15)]">
+        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-[0_0_15px_hsl(var(--primary)/0.15)]">
           <img
             src={`${import.meta.env.BASE_URL}images/logo.png`}
             alt="Aukizan"
@@ -130,7 +130,7 @@ function SidebarContent({
                       "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative",
                       isActive
                         ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                        : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                     )}
                   >
                     {isActive && (
@@ -161,7 +161,7 @@ function SidebarContent({
               <button
                 onClick={onTriggerIngestion}
                 disabled={isTriggerPending || ingestionStatus.isRunning}
-                className="p-1 rounded-md hover:bg-white/10 text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                className="p-1 rounded-md hover:bg-foreground/10 text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
                 title="Trigger ingestion"
               >
                 <RefreshCw className={cn("w-3 h-3", ingestionStatus.isRunning && "animate-spin text-primary")} />
@@ -333,7 +333,7 @@ export function Layout({ children }: LayoutProps) {
               {/* Close button */}
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
@@ -351,7 +351,7 @@ export function Layout({ children }: LayoutProps) {
       <main className="flex-1 relative overflow-y-auto h-screen bg-gradient-to-br from-background via-background to-secondary/20">
 
         {/* Top header bar */}
-        <div className="sticky top-0 z-10 h-14 md:h-16 w-full bg-background/60 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-6">
+        <div className="sticky top-0 z-10 h-14 md:h-16 w-full bg-background/60 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 md:px-6">
 
           {/* Mobile: logo + name on the left */}
           <div className="flex items-center gap-2 md:hidden">
@@ -373,7 +373,7 @@ export function Layout({ children }: LayoutProps) {
             <NotificationBell />
             <button
               onClick={() => setDrawerOpen(true)}
-              className="md:hidden h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+              className="md:hidden h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
@@ -413,7 +413,7 @@ export function Layout({ children }: LayoutProps) {
                     transition={{ duration: 0.2 }}
                   />
                 )}
-                <tab.icon className={cn("w-5 h-5 shrink-0", isActive && "drop-shadow-[0_0_6px_rgba(0,240,255,0.8)]")} />
+                <tab.icon className={cn("w-5 h-5 shrink-0", isActive && "drop-shadow-[0_0_6px_hsl(var(--primary)/0.8)]")} />
                 <span className="text-[10px] font-medium leading-tight">{tab.label}</span>
               </Link>
             );

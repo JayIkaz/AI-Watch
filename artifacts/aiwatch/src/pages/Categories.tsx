@@ -23,7 +23,7 @@ export default function Categories() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categoriesData?.categories.map(category => (
+          {categoriesData?.categories?.map(category => (
             <Link key={category.id} href={`/?category=${category.slug}`} className="group block">
               <div className="h-full bg-card rounded-2xl border border-border p-6 transition-all duration-300 hover:shadow-xl hover:border-primary/40 hover:-translate-y-1 relative overflow-hidden">
                 

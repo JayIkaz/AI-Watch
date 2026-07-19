@@ -81,10 +81,10 @@ export default function VendorDetail() {
               <SkeletonUpdateCard key={i} />
             ))}
           </div>
-        ) : updatesData?.updates.length === 0 ? (
+        ) : updatesData?.updates?.length === 0 ? (
           <div className="text-center text-muted-foreground py-10">No updates found for this vendor.</div>
         ) : (
-          updatesData?.updates.map(update => (
+          updatesData?.updates?.map(update => (
             <UpdateCard key={update.id} update={update} />
           ))
         )}

@@ -22,7 +22,7 @@ function LikedNewsCard({ item }: { item: LikedNews }) {
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex flex-wrap items-center gap-2">
           {item.highInterest && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-400/10 border-amber-400/30 text-amber-400">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber/10 border-amber/30 text-amber">
               <Zap className="w-3 h-3" />
               High Interest
             </span>
@@ -41,7 +41,7 @@ function LikedNewsCard({ item }: { item: LikedNews }) {
             onClick={() => toggle("news", item.id)}
             className={cn(
               "p-1.5 rounded-lg transition-all",
-              liked ? "text-rose-400 hover:text-rose-300" : "text-muted-foreground hover:text-rose-400"
+              liked ? "text-raspberry hover:text-raspberry/80" : "text-muted-foreground hover:text-raspberry"
             )}
             title={liked ? "Unlike" : "Like"}
           >
@@ -112,10 +112,10 @@ export default function Liked() {
     <Layout>
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <Heart className="w-6 h-6 text-rose-400 fill-rose-400" />
+          <Heart className="w-6 h-6 text-raspberry fill-raspberry" />
           <h1 className="text-3xl font-display font-bold text-foreground">Saved</h1>
           {total > 0 && (
-            <span className="text-sm font-semibold px-2.5 py-1 rounded-full bg-rose-400/10 border border-rose-400/20 text-rose-400">
+            <span className="text-sm font-semibold px-2.5 py-1 rounded-full bg-raspberry/10 border border-raspberry/20 text-raspberry">
               {total}
             </span>
           )}

@@ -19,14 +19,14 @@ function getRecommendedAction(slug: string): string {
 
 function getImpactColor(highImpact: boolean, score?: number | null) {
   if (highImpact) return "text-primary";
-  if ((score ?? 0) >= 0.6) return "text-amber-400";
+  if ((score ?? 0) >= 0.6) return "text-amber";
   return "text-muted-foreground";
 }
 
 const STAT_CATEGORIES = [
-  { label: "Pricing changes",  slug: "pricing",       icon: DollarSign, color: "text-green-400",  bg: "bg-green-400/10",  href: "/pricing" },
-  { label: "Model releases",   slug: "model-release", icon: Cpu,        color: "text-blue-400",   bg: "bg-blue-400/10",   href: "/model-releases" },
-  { label: "API changes",      slug: "api-changelog", icon: Code2,      color: "text-orange-400", bg: "bg-orange-400/10", href: "/api-changes" },
+  { label: "Pricing changes",  slug: "pricing",       icon: DollarSign, color: "text-teal",  bg: "bg-teal/10",  href: "/pricing" },
+  { label: "Model releases",   slug: "model-release", icon: Cpu,        color: "text-sky",   bg: "bg-sky/10",   href: "/model-releases" },
+  { label: "API changes",      slug: "api-changelog", icon: Code2,      color: "text-amber", bg: "bg-amber/10", href: "/api-changes" },
 ];
 
 export default function DailyBrief() {
