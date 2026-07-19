@@ -207,8 +207,8 @@ export function UpdateCard({ update }: UpdateCardProps) {
       )}
 
       {/* Bottom row */}
-      <div className={cn("mt-auto flex items-center justify-between border-t border-border/40", compact ? "pt-2" : "pt-3")}>
-        <div className="flex items-center gap-3">
+      <div className={cn("mt-auto flex flex-wrap items-center justify-between gap-y-1 border-t border-border/40", compact ? "pt-2" : "pt-3")}>
+        <div className="flex flex-wrap items-center gap-3 min-w-0">
           {/* Impact badge (only when not high-impact, to avoid repeat) */}
           {!update.highImpact && !compact && (
             <span className={cn("text-xs px-2 py-0.5 rounded-full border font-medium", impact.color)}>
@@ -233,7 +233,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-0.5">
+        <div className="flex flex-wrap items-center justify-end gap-0.5 ml-auto min-w-0">
           {/* Expand / collapse */}
           {!compact && (
             <button

@@ -358,7 +358,7 @@ function NewsCard({ item }: { item: NewsItem }) {
             <span>{SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType}</span>
           </div>
 
-          <div className="flex items-center gap-0.5">
+          <div className="flex flex-wrap items-center justify-end gap-0.5 ml-auto min-w-0">
             {/* Save */}
             <button
               onClick={() => toggle("news", item.id)}

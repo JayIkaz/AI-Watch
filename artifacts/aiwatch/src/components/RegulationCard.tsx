@@ -138,7 +138,7 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
       )}
 
       {/* Bottom row */}
-      <div className="mt-auto flex items-center justify-between border-t border-border/40 pt-3">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-y-1 border-t border-border/40 pt-3">
         <div
           className="flex items-center gap-1 text-xs text-muted-foreground"
           title="Based on jurisdiction scope, affected vendors, and compliance impact."
@@ -147,7 +147,7 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
           Relevance: {Math.round(item.relevance * 100)}%
         </div>
 
-        <div className="flex items-center gap-0.5">
+        <div className="flex flex-wrap items-center justify-end gap-0.5 ml-auto min-w-0">
           {/* Save */}
           <button
             onClick={() => {
@@ -201,7 +201,7 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
               className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary transition-colors bg-secondary px-2.5 py-1.5 rounded-lg border border-transparent hover:border-primary/20 ml-0.5"
               title={item.sourceName}
             >
-              {item.sourceName ?? "Source"} <ExternalLink className="w-3 h-3" />
+              <span className="max-w-[8rem] truncate">{item.sourceName ?? "Source"}</span> <ExternalLink className="w-3 h-3 shrink-0" />
             </a>
           )}
         </div>
