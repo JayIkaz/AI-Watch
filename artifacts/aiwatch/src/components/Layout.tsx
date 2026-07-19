@@ -15,6 +15,7 @@ import {
   Code2,
   Bell,
   Menu,
+  Scale,
 } from "lucide-react";
 import { useGetMe, getGetMeQueryKey, useGetIngestionStatus, getGetIngestionStatusQueryKey, useTriggerIngestion } from "@workspace/api-client-react";
 import { NotificationBell } from "./NotificationPanel";
@@ -272,6 +273,7 @@ export function Layout({ children }: LayoutProps) {
         { href: "/pricing",        label: "Pricing Watch",  icon: DollarSign },
         { href: "/model-releases", label: "Model Releases", icon: Cpu },
         { href: "/api-changes",    label: "API Changes",    icon: Code2 },
+        { href: "/regulation",     label: "Regulation & Policy", icon: Scale },
       ],
     },
     {

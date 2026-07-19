@@ -18,6 +18,7 @@ import DailyBrief from "./pages/DailyBrief";
 import PricingWatch from "./pages/PricingWatch";
 import ModelReleases from "./pages/ModelReleases";
 import ApiChanges from "./pages/ApiChanges";
+import RegulationPolicy from "./pages/RegulationPolicy";
 import Alerts from "./pages/Alerts";
 
 const queryClient = new QueryClient({
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/pricing" component={PricingWatch} />
       <Route path="/model-releases" component={ModelReleases} />
       <Route path="/api-changes" component={ApiChanges} />
+      <Route path="/regulation" component={RegulationPolicy} />
       <Route path="/vendors" component={Vendors} />
       <Route path="/vendors/:slug" component={VendorDetail} />
       <Route path="/categories" component={Categories} />
