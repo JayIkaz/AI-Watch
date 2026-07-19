@@ -28,12 +28,12 @@ export function decodeHtml(str: string | null | undefined): string {
 
 export function getCategoryColor(slug: string) {
   const colors: Record<string, string> = {
-    "model-release": "text-blue-400 bg-blue-400/10 border-blue-400/20",
-    "api-changelog": "text-orange-400 bg-orange-400/10 border-orange-400/20",
-    "pricing": "text-green-400 bg-green-400/10 border-green-400/20",
-    "safety": "text-purple-400 bg-purple-400/10 border-purple-400/20",
-    "research": "text-indigo-400 bg-indigo-400/10 border-indigo-400/20",
-    "product": "text-pink-400 bg-pink-400/10 border-pink-400/20",
+    "model-release": "text-sky bg-sky/10 border-sky/20",
+    "api-changelog": "text-amber bg-amber/10 border-amber/20",
+    "pricing": "text-teal bg-teal/10 border-teal/20",
+    "safety": "text-violet bg-violet/10 border-violet/20",
+    "research": "text-violet bg-violet/10 border-violet/20",
+    "product": "text-raspberry bg-raspberry/10 border-raspberry/20",
   };
-  return colors[slug] || "text-cyan-400 bg-cyan-400/10 border-cyan-400/20";
+  return colors[slug] || "text-sky bg-sky/10 border-sky/20";
 }

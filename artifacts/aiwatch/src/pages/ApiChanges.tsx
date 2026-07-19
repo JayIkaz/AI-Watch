@@ -80,8 +80,8 @@ export default function ApiChanges() {
       <div className="max-w-3xl">
         {/* Header */}
         <div className="mb-6 flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-orange-400/10 border border-orange-400/20 shrink-0">
-            <Code2 className="w-6 h-6 text-orange-400" />
+          <div className="p-3 rounded-xl bg-amber/10 border border-amber/20 shrink-0">
+            <Code2 className="w-6 h-6 text-amber" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-display font-bold text-foreground mb-1">API Changes</h1>
@@ -113,7 +113,7 @@ export default function ApiChanges() {
               High Impact Only
             </button>
             {vendorLabel && (
-              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-400/15 border border-orange-400/40 text-orange-400">
+              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber/15 border border-amber/40 text-amber">
                 {vendorLabel}
               </span>
             )}
@@ -128,7 +128,7 @@ export default function ApiChanges() {
           </div>
 
           {/* Vendor chips */}
-          {vendorsData && vendorsData.vendors.length > 0 && (
+          {vendorsData?.vendors && vendorsData.vendors.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {vendorsData.vendors.map((v) => {
                 const hasCount = countsData !== undefined;
@@ -143,7 +143,7 @@ export default function ApiChanges() {
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
                       isSelected
-                        ? "bg-orange-400/15 border-orange-400/40 text-orange-400"
+                        ? "bg-amber/15 border-amber/40 text-amber"
                         : isZero
                         ? "bg-card border-border text-muted-foreground opacity-35 cursor-not-allowed"
                         : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-border/80"
@@ -155,7 +155,7 @@ export default function ApiChanges() {
                         className={cn(
                           "inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none tabular-nums",
                           isSelected
-                            ? "bg-orange-400/30 text-orange-300"
+                            ? "bg-amber/30 text-amber"
                             : "bg-muted text-muted-foreground"
                         )}
                       >
@@ -218,7 +218,7 @@ export default function ApiChanges() {
               <span className="text-sm text-muted-foreground">Page {page + 1}</span>
               <button
                 onClick={() => setPage((p) => p + 1)}
-                disabled={!data || data.updates.length < limit}
+                disabled={!data?.updates || data.updates.length < limit}
                 className="px-4 py-2 rounded-xl text-sm font-medium bg-secondary text-foreground hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next

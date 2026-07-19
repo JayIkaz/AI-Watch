@@ -40,7 +40,7 @@ export default function Settings() {
     values: prefs ? {
       digestFrequency: prefs.digestFrequency,
       emailAlerts: prefs.emailAlerts,
-      alertKeywords: prefs.alertKeywords.join(", ")
+      alertKeywords: prefs.alertKeywords?.join(", ") ?? ""
     } : {
       digestFrequency: "none",
       emailAlerts: false,
@@ -120,7 +120,7 @@ export default function Settings() {
                   className={cn(
                     "flex flex-col items-center gap-2.5 p-4 rounded-xl border text-sm font-medium transition-all",
                     theme === value
-                      ? "border-primary bg-primary/10 text-primary shadow-[0_0_12px_rgba(0,240,255,0.1)]"
+                      ? "border-primary bg-primary/10 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.1)]"
                       : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-border/80"
                   )}
                 >
@@ -147,7 +147,7 @@ export default function Settings() {
                   className={cn(
                     "flex flex-col items-start gap-1.5 p-4 rounded-xl border text-sm transition-all text-left",
                     density === value
-                      ? "border-primary bg-primary/10 shadow-[0_0_12px_rgba(0,240,255,0.1)]"
+                      ? "border-primary bg-primary/10 shadow-[0_0_12px_hsl(var(--primary)/0.1)]"
                       : "border-border bg-background hover:border-border/80"
                   )}
                 >
@@ -254,7 +254,7 @@ export default function Settings() {
                 >
                   {updatePrefs.isPending ? "Saving..." : <><Save className="w-4 h-4" /> Save Preferences</>}
                 </button>
-                {updatePrefs.isSuccess && <p className="text-green-400 text-sm mt-3">Preferences updated successfully.</p>}
+                {updatePrefs.isSuccess && <p className="text-teal text-sm mt-3">Preferences updated successfully.</p>}
               </div>
 
             </form>
@@ -280,9 +280,9 @@ export default function Settings() {
                     </code>
                     <button
                       onClick={handleCopy}
-                      className="p-2.5 bg-secondary hover:bg-white/10 rounded-lg border border-border transition-colors text-foreground"
+                      className="p-2.5 bg-secondary hover:bg-foreground/10 rounded-lg border border-border transition-colors text-foreground"
                     >
-                      {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
+                      {copied ? <Check className="w-5 h-5 text-teal" /> : <Copy className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
@@ -312,7 +312,7 @@ export default function Settings() {
               <button
                 onClick={handleCreateKey}
                 disabled={!newKeyName.trim() || createKey.isPending}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-foreground text-background font-semibold hover:bg-white/90 transition-colors disabled:opacity-50 h-[48px]"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-foreground text-background font-semibold hover:bg-foreground/90 transition-colors disabled:opacity-50 h-[48px]"
               >
                 <Plus className="w-4 h-4" /> Generate
               </button>
@@ -326,7 +326,7 @@ export default function Settings() {
 
             {keysLoading ? (
               <div className="p-8 text-center text-muted-foreground">Loading keys...</div>
-            ) : !apiKeys?.keys.length ? (
+            ) : !apiKeys?.keys?.length ? (
               <div className="p-12 text-center flex flex-col items-center">
                 <Key className="w-12 h-12 text-muted-foreground/30 mb-4" />
                 <p className="text-foreground font-medium">No API keys found</p>
@@ -346,7 +346,7 @@ export default function Settings() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {apiKeys.keys.map(k => (
-                      <tr key={k.id} className="hover:bg-white/5 transition-colors">
+                      <tr key={k.id} className="hover:bg-foreground/5 transition-colors">
                         <td className="px-6 py-4 font-medium text-foreground">{k.name}</td>
                         <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{k.keyPrefix}...</td>
                         <td className="px-6 py-4 text-muted-foreground">{new Date(k.createdAt).toLocaleDateString()}</td>

@@ -18,20 +18,20 @@ interface UpdateCardProps {
 
 function getCredibilityBadge(update: Update) {
   if (update.flaggedForReview) {
-    return { label: "Under review", color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" };
+    return { label: "Under review", color: "text-amber bg-amber/10 border-amber/20" };
   }
   const s = update.confidenceScore ?? 0;
-  if (s >= 0.9)  return { label: "Official update",   color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" };
-  if (s >= 0.75) return { label: "Confirmed",          color: "text-blue-400 bg-blue-400/10 border-blue-400/20" };
-  if (s >= 0.55) return { label: "Credible report",    color: "text-cyan-400 bg-cyan-400/10 border-cyan-400/20" };
-  if (s > 0)     return { label: "Industry rumour",    color: "text-orange-400 bg-orange-400/10 border-orange-400/20" };
+  if (s >= 0.9)  return { label: "Official update",   color: "text-teal bg-teal/10 border-teal/20" };
+  if (s >= 0.75) return { label: "Confirmed",          color: "text-sky bg-sky/10 border-sky/20" };
+  if (s >= 0.55) return { label: "Credible report",    color: "text-amber bg-amber/10 border-amber/20" };
+  if (s > 0)     return { label: "Industry rumour",    color: "text-raspberry bg-raspberry/10 border-raspberry/20" };
   return           { label: "Unconfirmed",             color: "text-muted-foreground bg-muted/30 border-border" };
 }
 
 function getImpact(update: Update): { label: string; color: string } {
   if (update.highImpact) return { label: "High impact", color: "text-primary bg-primary/10 border-primary/30" };
   const s = update.confidenceScore ?? 0;
-  if (s >= 0.6)  return { label: "Medium impact", color: "text-amber-400 bg-amber-400/10 border-amber-400/20" };
+  if (s >= 0.6)  return { label: "Medium impact", color: "text-amber bg-amber/10 border-amber/20" };
   return           { label: "Low impact",    color: "text-muted-foreground bg-muted/20 border-border" };
 }
 
@@ -81,7 +81,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
       "group relative flex flex-col bg-card rounded-2xl border transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5",
       compact ? "p-3 md:p-4" : "p-5 md:p-6",
       update.highImpact
-        ? "border-l-[3px] border-l-primary border-t border-r border-b border-primary/25 hover:border-primary/40 shadow-[0_0_0_1px_rgba(0,240,255,0.06)]"
+        ? "border-l-[3px] border-l-primary border-t border-r border-b border-primary/25 hover:border-primary/40 shadow-[0_0_0_1px_hsl(var(--primary)/0.06)]"
         : "border-border hover:border-primary/30"
     )}>
       {update.highImpact && (
@@ -195,7 +195,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
               <div className="flex items-center gap-1">
                 <div className="w-20 h-1.5 rounded-full bg-secondary overflow-hidden">
                   <div
-                    className={cn("h-full rounded-full", update.confidenceScore > 0.7 ? "bg-emerald-400" : update.confidenceScore > 0.5 ? "bg-amber-400" : "bg-muted-foreground")}
+                    className={cn("h-full rounded-full", update.confidenceScore > 0.7 ? "bg-teal" : update.confidenceScore > 0.5 ? "bg-amber" : "bg-muted-foreground")}
                     style={{ width: `${Math.round(update.confidenceScore * 100)}%` }}
                   />
                 </div>
@@ -221,12 +221,12 @@ export function UpdateCard({ update }: UpdateCardProps) {
               className="flex items-center gap-1 text-xs text-muted-foreground"
               title="Based on vendor, category, keywords, and content analysis."
             >
-              <CheckCircle2 className={cn("w-3.5 h-3.5", update.confidenceScore > 0.8 ? "text-emerald-400" : "text-amber-400")} />
+              <CheckCircle2 className={cn("w-3.5 h-3.5", update.confidenceScore > 0.8 ? "text-teal" : "text-amber")} />
               Relevance: {Math.round(update.confidenceScore * 100)}%
             </div>
           )}
           {update.flaggedForReview && (
-            <div className="flex items-center gap-1 text-xs font-medium text-yellow-500">
+            <div className="flex items-center gap-1 text-xs font-medium text-amber">
               <AlertTriangle className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Flagged</span>
             </div>
@@ -238,7 +238,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
           {!compact && (
             <button
               onClick={() => setExpanded(v => !v)}
-              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all"
               title={expanded ? "Show less" : "Show more details"}
             >
               {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -251,8 +251,8 @@ export function UpdateCard({ update }: UpdateCardProps) {
             className={cn(
               "h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-200",
               liked
-                ? "text-rose-400 hover:text-rose-300"
-                : "text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10"
+                ? "text-raspberry hover:text-raspberry/80"
+                : "text-muted-foreground hover:text-raspberry hover:bg-raspberry/10"
             )}
             title={liked ? "Remove from Saved" : "Save"}
           >
@@ -262,7 +262,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
           {/* More like this */}
           <button
             onClick={() => toast({ title: "Preference noted", description: "You'll see more updates like this." })}
-            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-emerald-400 hover:bg-emerald-400/10 transition-all"
+            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-teal hover:bg-teal/10 transition-all"
             title="More like this"
           >
             <ThumbsUp className="w-4 h-4" />
@@ -271,7 +271,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
           {/* Less like this */}
           <button
             onClick={() => toast({ title: "Preference noted", description: "You'll see fewer updates like this." })}
-            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10 transition-all"
+            className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-raspberry hover:bg-raspberry/10 transition-all"
             title="Less like this"
           >
             <ThumbsDown className="w-4 h-4" />
