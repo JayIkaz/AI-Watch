@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://ai-watch.replit.app/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
