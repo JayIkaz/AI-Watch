@@ -1,4 +1,3 @@
-export * from "./auth";
 export * from "./vendors";
 export * from "./categories";
 export * from "./updates";
@@ -8,3 +7,4 @@ export * from "./ingestionSources";
 export * from "./newsItems";
 export * from "./newsSources";
 export * from "./userLikes";
+export * from "./userIdMapping";

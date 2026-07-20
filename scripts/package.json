@@ -6,10 +6,12 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed": "tsx ./src/seed.ts",
+    "ingest": "tsx ./src/ingest.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@workspace/db": "workspace:*",
+    "@workspace/ingestion": "workspace:*",
     "drizzle-orm": "catalog:",
     "pg": "^8.20.0"
   },

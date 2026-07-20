@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://ai-watch.replit.app/api/$1"
+      "destination": "https://ai-watch-api-server-git-supabase-migration-aukizan.vercel.app/api/$1"
     },
     {
       "source": "/(.*)",

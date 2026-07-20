@@ -124,7 +124,10 @@ router.post("/v1/likes", async (req: any, res) => {
   }
 
   const parsed = likeBodySchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: "Invalid body" });
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid body" });
+    return;
+  }
 
   const { itemType, itemId } = parsed.data;
   try {
@@ -149,7 +152,8 @@ router.delete("/v1/likes/:itemType/:itemId", async (req: any, res) => {
   const itemId = parseInt(req.params.itemId, 10);
 
   if (!["update", "news"].includes(itemType) || isNaN(itemId)) {
-    return res.status(400).json({ error: "Invalid params" });
+    res.status(400).json({ error: "Invalid params" });
+    return;
   }
 
   try {
