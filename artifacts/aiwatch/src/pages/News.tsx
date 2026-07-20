@@ -38,36 +38,36 @@ const CREDIBILITY_CONFIG: Record<NewsCredibility, {
   verified: {
     label: "Verified",
     shortLabel: "Verified",
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10",
-    border: "border-emerald-400/30",
+    color: "text-teal",
+    bg: "bg-teal/10",
+    border: "border-teal/30",
     icon: ({ className }) => <ShieldCheck className={className} />,
     description: "Confirmed by official or highly reliable sources.",
   },
   likely: {
     label: "Credible",
     shortLabel: "Credible",
-    color: "text-blue-400",
-    bg: "bg-blue-400/10",
-    border: "border-blue-400/30",
+    color: "text-sky",
+    bg: "bg-sky/10",
+    border: "border-sky/30",
     icon: ({ className }) => <CheckCircle className={className} />,
     description: "Reported by reputable sources but not fully confirmed from primary evidence.",
   },
   unverified: {
     label: "Unverified",
     shortLabel: "Unverified",
-    color: "text-amber-400",
-    bg: "bg-amber-400/10",
-    border: "border-amber-400/30",
+    color: "text-amber",
+    bg: "bg-amber/10",
+    border: "border-amber/30",
     icon: ({ className }) => <HelpCircle className={className} />,
     description: "Plausible, but not independently confirmed.",
   },
   gossip: {
     label: "Chatter",
     shortLabel: "Chatter",
-    color: "text-rose-400",
-    bg: "bg-rose-400/10",
-    border: "border-rose-400/30",
+    color: "text-raspberry",
+    bg: "bg-raspberry/10",
+    border: "border-raspberry/30",
     icon: ({ className }) => <MessageCircle className={className} />,
     description: "Social media, anonymous, or weakly sourced claims.",
   },
@@ -84,7 +84,7 @@ function deriveImpact(item: NewsItem): Impact {
 
 const IMPACT_CONFIG: Record<Impact, { color: string; bg: string; border: string }> = {
   "High impact":   { color: "text-primary",       bg: "bg-primary/10",     border: "border-primary/30" },
-  "Medium impact": { color: "text-amber-400",      bg: "bg-amber-400/10",   border: "border-amber-400/20" },
+  "Medium impact": { color: "text-amber",      bg: "bg-amber/10",   border: "border-amber/20" },
   "Low impact":    { color: "text-muted-foreground", bg: "bg-muted/20",     border: "border-border" },
 };
 
@@ -178,11 +178,11 @@ function NewsCard({ item }: { item: NewsItem }) {
     <div className={cn(
       "group relative flex flex-col bg-card rounded-2xl border transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5",
       item.highInterest
-        ? "border-l-[3px] border-l-amber-400 border-t border-r border-b border-amber-400/20 shadow-[0_0_0_1px_rgba(251,191,36,0.05)]"
+        ? "border-l-[3px] border-l-amber border-t border-r border-b border-amber/20 shadow-[0_0_0_1px_hsl(var(--amber)/0.05)]"
         : "border-border hover:border-primary/20",
     )}>
       {item.highInterest && (
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-400/[0.03] via-transparent to-transparent rounded-2xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-amber/[0.03] via-transparent to-transparent rounded-2xl pointer-events-none" />
       )}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
 
@@ -206,7 +206,7 @@ function NewsCard({ item }: { item: NewsItem }) {
               </span>
             )}
             {item.highInterest && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-400/10 border-amber-400/30 text-amber-400">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber/10 border-amber/30 text-amber">
                 <Zap className="w-3 h-3" />
                 High Interest
               </span>
@@ -236,7 +236,7 @@ function NewsCard({ item }: { item: NewsItem }) {
         {/* Why it matters */}
         <div className={cn(
           "p-3 rounded-xl border text-sm",
-          item.highInterest ? "bg-amber-400/5 border-amber-400/20" : "bg-muted/20 border-border/60"
+          item.highInterest ? "bg-amber/5 border-amber/20" : "bg-muted/20 border-border/60"
         )}>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Why it matters</p>
           <p className="text-sm text-foreground/80 leading-relaxed">{whyItMatters}</p>
@@ -249,7 +249,7 @@ function NewsCard({ item }: { item: NewsItem }) {
           {" · "}
           <span className={impactCfg.color}>{impact}</span>
           {" · "}
-          <span className={item.highInterest ? "text-amber-400" : ""}>{item.highInterest ? "High interest" : "Normal interest"}</span>
+          <span className={item.highInterest ? "text-amber" : ""}>{item.highInterest ? "High interest" : "Normal interest"}</span>
           {" · "}
           <span className="text-foreground/70">{action}</span>
         </p>
@@ -269,7 +269,7 @@ function NewsCard({ item }: { item: NewsItem }) {
 
             {/* High interest reason (only in expanded view) */}
             {item.highInterest && (
-              <div className="text-xs text-amber-400/80 bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-2 leading-relaxed">
+              <div className="text-xs text-amber/80 bg-amber/5 border border-amber/20 rounded-lg px-3 py-2 leading-relaxed">
                 <span className="font-semibold">Why high interest: </span>
                 {deriveHighInterestReason(item)}
               </div>
@@ -358,13 +358,13 @@ function NewsCard({ item }: { item: NewsItem }) {
             <span>{SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType}</span>
           </div>
 
-          <div className="flex items-center gap-0.5">
+          <div className="flex flex-wrap items-center justify-end gap-0.5 ml-auto min-w-0">
             {/* Save */}
             <button
               onClick={() => toggle("news", item.id)}
               className={cn(
                 "h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-200",
-                liked ? "text-rose-400" : "text-muted-foreground hover:text-rose-400 hover:bg-rose-400/10"
+                liked ? "text-raspberry" : "text-muted-foreground hover:text-raspberry hover:bg-raspberry/10"
               )}
               title={liked ? "Saved" : "Save"}
             >
@@ -388,7 +388,7 @@ function NewsCard({ item }: { item: NewsItem }) {
                 }
                 toast({ title: "Link copied", description: "Source URL copied to clipboard." });
               }}
-              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+              className="h-10 w-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all"
               title="Share"
             >
               <Share2 className="w-4 h-4" />
@@ -443,7 +443,7 @@ function FilterChip({
       onClick={onClick}
       className={cn(
         "w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm border transition-all text-left",
-        active ? activeClass : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-white/5"
+        active ? activeClass : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-foreground/5"
       )}
     >
       <div className={cn("w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center text-[9px]", active ? "bg-primary border-primary text-background" : "border-border")}>
@@ -480,7 +480,7 @@ function NewsScanStatus({ onTrigger, isPending }: { onTrigger: () => void; isPen
         <button
           onClick={onTrigger}
           disabled={isPending || isRunning}
-          className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+          className="p-1.5 rounded-lg hover:bg-foreground/10 text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
           title="Trigger news scan"
         >
           <RefreshCw className={cn("w-3.5 h-3.5", isRunning && "animate-spin text-primary")} />
@@ -510,11 +510,11 @@ function NewsScanStatus({ onTrigger, isPending }: { onTrigger: () => void; isPen
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Flagged high interest</span>
-          <span className="text-amber-400 font-medium">{highInterestCount}</span>
+          <span className="text-amber font-medium">{highInterestCount}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Unverified / Chatter</span>
-          <span className="text-rose-400/80">{lowConfidenceCount}</span>
+          <span className="text-raspberry/80">{lowConfidenceCount}</span>
         </div>
         {!isRunning && (
           <div className="flex justify-between">
@@ -694,7 +694,7 @@ export default function News() {
                 className={cn(
                   "flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
                   highInterestOnly
-                    ? "bg-amber-400/10 border-amber-400/40 text-amber-400"
+                    ? "bg-amber/10 border-amber/40 text-amber"
                     : "bg-card border-border text-muted-foreground"
                 )}
               >
@@ -801,7 +801,7 @@ export default function News() {
               ))}
               {highInterestOnly && (
                 <button onClick={() => updateParam(next => next.delete("hi"))}
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium text-amber-400 bg-amber-400/10 border-amber-400/30">
+                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium text-amber bg-amber/10 border-amber/30">
                   High Interest Only ×
                 </button>
               )}
@@ -861,7 +861,7 @@ export default function News() {
                 <span className="text-sm text-muted-foreground">Page {page + 1}</span>
                 <button
                   onClick={() => setPage(p => p + 1)}
-                  disabled={!data || data.news.length < limit}
+                  disabled={!data?.news || data.news.length < limit}
                   className="px-4 py-2 rounded-xl text-sm font-medium bg-secondary text-foreground hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Next
@@ -899,13 +899,13 @@ export default function News() {
                   className={cn(
                     "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all",
                     highInterestOnly
-                      ? "bg-amber-400/10 border-amber-400/40 text-amber-400"
-                      : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      ? "bg-amber/10 border-amber/40 text-amber"
+                      : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                   )}
                 >
-                  <Zap className={cn("w-4 h-4", highInterestOnly ? "text-amber-400" : "text-muted-foreground")} />
+                  <Zap className={cn("w-4 h-4", highInterestOnly ? "text-amber" : "text-muted-foreground")} />
                   High Interest Only
-                  {highInterestOnly && <span className="ml-auto w-2 h-2 rounded-full bg-amber-400 animate-pulse" />}
+                  {highInterestOnly && <span className="ml-auto w-2 h-2 rounded-full bg-amber animate-pulse" />}
                 </button>
               </div>
 
@@ -923,7 +923,7 @@ export default function News() {
                         onClick={() => toggleRating(rating)}
                         className={cn(
                           "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm border transition-all text-left",
-                          active ? cn(cfg.bg, cfg.border, cfg.color) : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-white/5"
+                          active ? cn(cfg.bg, cfg.border, cfg.color) : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                         )}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -951,7 +951,7 @@ export default function News() {
                         onClick={() => toggleImpact(impact)}
                         className={cn(
                           "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all text-left",
-                          active ? cn(cfg.bg, cfg.border, cfg.color) : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-white/5"
+                          active ? cn(cfg.bg, cfg.border, cfg.color) : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                         )}
                       >
                         <BarChart3 className="w-3.5 h-3.5 shrink-0" />
@@ -991,7 +991,7 @@ export default function News() {
                           "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all text-left",
                           active
                             ? "bg-primary/10 border-primary/30 text-primary"
-                            : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-white/5"
+                            : "bg-background border-border text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                         )}
                       >
                         <Clock className="w-3.5 h-3.5 shrink-0" />

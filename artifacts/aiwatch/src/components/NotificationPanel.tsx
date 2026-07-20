@@ -104,13 +104,13 @@ export function NotificationBell() {
           "relative p-2 rounded-full transition-all duration-200",
           open
             ? "text-primary bg-primary/10"
-            : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+            : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
         )}
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
         {totalCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 min-w-[8px] h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(0,240,255,0.8)]" />
+          <span className="absolute top-1.5 right-1.5 min-w-[8px] h-2 bg-primary rounded-full shadow-[0_0_10px_hsl(var(--primary)/0.8)]" />
         )}
         {totalCount === 0 && (
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-muted-foreground/30 rounded-full" />
@@ -139,7 +139,7 @@ export function NotificationBell() {
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -154,7 +154,7 @@ export function NotificationBell() {
 
               {/* High-impact updates */}
               <Section
-                icon={<Zap className="w-4 h-4 text-amber-400" />}
+                icon={<Zap className="w-4 h-4 text-amber" />}
                 title="High-Impact Updates"
                 emptyText={lastViewedAt ? "No new high-impact updates since your last visit." : "No high-impact updates yet."}
                 loading={updatesLoading}
@@ -181,7 +181,7 @@ export function NotificationBell() {
 
               {/* High-interest news */}
               <Section
-                icon={<Newspaper className="w-4 h-4 text-blue-400" />}
+                icon={<Newspaper className="w-4 h-4 text-sky" />}
                 title="High-Interest News"
                 emptyText={lastViewedAt ? "No new high-interest news since your last visit." : "No high-interest news yet."}
                 loading={newsLoading}
@@ -275,7 +275,7 @@ function StatusRow({
         {isRunning ? (
           <RefreshCw className="w-3.5 h-3.5 text-primary animate-spin" />
         ) : (
-          <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckCircle className="w-3.5 h-3.5 text-teal" />
         )}
         <span className="text-foreground font-medium">{label}</span>
       </div>
@@ -359,16 +359,16 @@ function NotifItem({
   href: string;
 }) {
   const dotColors = {
-    amber: "bg-amber-400 shadow-[0_0_6px_theme(colors.amber.400)]",
-    blue: "bg-blue-400 shadow-[0_0_6px_theme(colors.blue.400)]",
-    emerald: "bg-emerald-400 shadow-[0_0_6px_theme(colors.emerald.400)]",
-    rose: "bg-rose-400 shadow-[0_0_6px_theme(colors.rose.400)]",
+    amber: "bg-amber shadow-[0_0_6px_hsl(var(--amber))]",
+    blue: "bg-sky shadow-[0_0_6px_hsl(var(--sky))]",
+    emerald: "bg-teal shadow-[0_0_6px_hsl(var(--teal))]",
+    rose: "bg-raspberry shadow-[0_0_6px_hsl(var(--raspberry))]",
   };
 
   return (
     <Link
       href={href}
-      className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer"
+      className="flex items-start gap-3 p-3 rounded-xl hover:bg-foreground/5 transition-colors group cursor-pointer"
     >
       <div className={cn("w-2 h-2 rounded-full mt-1.5 shrink-0", dotColors[dot])} />
       <div className="flex-1 min-w-0">

@@ -20,7 +20,7 @@ export default function Login() {
         <div className="bg-card/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl shadow-black">
           
           <div className="flex flex-col items-center text-center mb-10">
-            <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 shadow-[0_0_30px_rgba(0,240,255,0.2)] mb-6">
+            <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 shadow-[0_0_30px_hsl(var(--primary)/0.2)] mb-6">
               <img 
                 src={`${import.meta.env.BASE_URL}images/logo.png`} 
                 alt="Aukizan Logo" 
@@ -42,7 +42,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => signIn()}
-              className="flex items-center justify-center w-full py-4 px-6 rounded-xl bg-foreground text-background font-semibold text-lg hover:bg-white/90 transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-white/10"
+              className="flex items-center justify-center w-full py-4 px-6 rounded-xl bg-foreground text-background font-semibold text-lg hover:bg-foreground/90 transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-foreground/10"
             >
               Sign in
             </button>

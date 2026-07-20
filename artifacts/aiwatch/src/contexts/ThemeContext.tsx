@@ -9,9 +9,9 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark",
+  theme: "light",
   setTheme: () => {},
-  resolvedTheme: "dark",
+  resolvedTheme: "light",
 });
 
 function getSystemTheme(): "dark" | "light" {
@@ -20,7 +20,7 @@ function getSystemTheme(): "dark" | "light" {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem("aiwatch-theme") as Theme) ?? "dark";
+    return (localStorage.getItem("aiwatch-theme") as Theme) ?? "light";
   });
 
   const resolvedTheme: "dark" | "light" = theme === "system" ? getSystemTheme() : theme;
