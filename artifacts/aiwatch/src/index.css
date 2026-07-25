@@ -44,17 +44,17 @@
   --card: 0 0% 100%;
   --card-foreground: 251 30% 17%;
 
-  --border: 42 34% 87%;
+  --border: 40 36% 76%;
   --ring: 247 74% 63%;
 
   --primary: 247 74% 63%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 43 45% 92%;
+  --secondary: 40 40% 85%;
   --secondary-foreground: 251 30% 17%;
 
-  --muted: 43 45% 92%;
-  --muted-foreground: 259 11% 45%;
+  --muted: 40 40% 85%;
+  --muted-foreground: 259 15% 40%;
 
   --accent: 192 86% 38%;
   --accent-foreground: 0 0% 100%;
