@@ -24,7 +24,7 @@ const logosBySlug: Record<string, string> = {
 
 async function main() {
   for (const [slug, domain] of Object.entries(logosBySlug)) {
-    const logoUrl = `https://logo.clearbit.com/${domain}`;
+    const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
     const result = await db
       .update(vendorsTable)
       .set({ logoUrl })
