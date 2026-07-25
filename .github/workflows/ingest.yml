@@ -1,0 +1,45 @@
+name: Ingestion
+
+on:
+  schedule:
+    # 17 minutes past every 6th hour — offset from the top of the hour to
+    # avoid piling onto the same minute as everyone else's cron jobs.
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which ingestion loop(s) to run"
+        type: choice
+        default: both
+        options:
+          - both
+          - vendors
+          - news
+
+concurrency:
+  group: aiwatch-ingestion
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: pnpm --filter @workspace/scripts run ingest -- --target=${{ github.event.inputs.target || 'both' }}

@@ -3,6 +3,7 @@ import { db, updatesTable, vendorsTable, categoriesTable } from "@workspace/db";
 import {
   eq, and, gte, lte, ilike, or, desc, count, SQL
 } from "drizzle-orm";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
@@ -187,7 +188,7 @@ router.get("/v1/updates/:id", async (req, res) => {
   }
 });
 
-router.patch("/v1/updates/:id/flag", async (req, res) => {
+router.patch("/v1/updates/:id/flag", requireAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { flagged } = req.body as { flagged: boolean };

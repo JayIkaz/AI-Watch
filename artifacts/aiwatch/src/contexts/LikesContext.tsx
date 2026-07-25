@@ -1,7 +1,14 @@
 import { createContext, useContext, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { LikeIds } from "@workspace/api-client-react";
+import type { LikeIds } from "@/lib/likesTypes";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
+import { supabase } from "@/lib/supabaseClient";
+
+async function authHeaders(): Promise<HeadersInit> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { authorization: `Bearer ${token}` } : {};
+}
 
 export const LIKES_QK = ["/api/v1/likes"] as const;
 export const LIKED_ITEMS_QK = ["/api/v1/likes/items"] as const;
@@ -27,7 +34,7 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
   const { data } = useQuery<LikeIds>({
     queryKey: LIKES_QK,
     queryFn: async ({ signal }) => {
-      const res = await fetch("/api/v1/likes", { signal, credentials: "include" });
+      const res = await fetch("/api/v1/likes", { signal, headers: await authHeaders() });
       if (!res.ok) return { updateIds: [], newsIds: [] };
       return res.json();
     },
@@ -64,13 +71,13 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
     });
 
     try {
+      const auth = await authHeaders();
       if (currently) {
-        await fetch(`/api/v1/likes/${type}/${id}`, { method: "DELETE", credentials: "include" });
+        await fetch(`/api/v1/likes/${type}/${id}`, { method: "DELETE", headers: auth });
       } else {
         await fetch("/api/v1/likes", {
           method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...auth },
           body: JSON.stringify({ itemType: type, itemId: id }),
         });
       }

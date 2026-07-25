@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784319845530,
+      "tag": "0000_calm_viper",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784319968583,
+      "tag": "0001_drop_replit_auth_tables",
+      "breakpoints": true
+    }
+  ]
+}

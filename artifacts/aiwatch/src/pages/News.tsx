@@ -338,9 +338,9 @@ function NewsCard({ item }: { item: NewsItem }) {
         )}
 
         {/* Mentioned vendors */}
-        {item.mentionedVendors?.length > 0 && (
+        {(item.mentionedVendors?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {item.mentionedVendors.map(v => (
+            {(item.mentionedVendors ?? []).map(v => (
               <span key={v} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary border border-border text-muted-foreground">
                 <Building2 className="w-2.5 h-2.5" />
                 {v}
