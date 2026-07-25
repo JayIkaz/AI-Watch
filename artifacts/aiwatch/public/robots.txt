@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://aukizan.replit.app/sitemap.xml
+Sitemap: https://aukizan.com/sitemap.xml
