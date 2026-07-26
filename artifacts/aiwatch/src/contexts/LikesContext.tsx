@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { LikeIds } from "@/lib/likesTypes";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { supabase } from "@/lib/supabaseClient";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 async function authHeaders(): Promise<HeadersInit> {
   const { data } = await supabase.auth.getSession();
@@ -30,6 +32,10 @@ const LikesContext = createContext<LikesContextValue>({
 export function LikesProvider({ children }: { children: React.ReactNode }) {
   const { data: user } = useGetMe({ query: { queryKey: getGetMeQueryKey(), retry: false } });
   const qc = useQueryClient();
+  const { toast } = useToast();
+  const goToLogin = () => {
+    window.location.href = `${import.meta.env.BASE_URL}login`;
+  };
 
   const { data } = useQuery<LikeIds>({
     queryKey: LIKES_QK,
@@ -53,6 +59,19 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
   );
 
   const toggle = useCallback(async (type: "update" | "news", id: number) => {
+    if (!user) {
+      toast({
+        title: "Log in to save items",
+        description: "Create a free account to save updates and come back to them later.",
+        action: (
+          <ToastAction altText="Log in" onClick={goToLogin}>
+            Log in
+          </ToastAction>
+        ),
+      });
+      return;
+    }
+
     const currently = type === "update" ? likedUpdateIds.has(id) : likedNewsIds.has(id);
 
     qc.setQueryData<LikeIds>(LIKES_QK, (old) => {
@@ -86,7 +105,7 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
       qc.invalidateQueries({ queryKey: LIKES_QK });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, qc]);
+  }, [data, qc, user, toast]);
 
   return (
     <LikesContext.Provider value={{ likedUpdateIds, likedNewsIds, isLiked, toggle }}>
