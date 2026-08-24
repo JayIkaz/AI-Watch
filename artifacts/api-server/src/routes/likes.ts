@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, userLikesTable, updatesTable, vendorsTable, categoriesTable, newsItemsTable } from "@workspace/db";
+import { db, userLikesTable, updatesTable, vendorsTable, categoriesTable, newsItemsTable, regulationItemsTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
 
@@ -8,7 +8,7 @@ const router = Router();
 // GET /v1/likes — return liked IDs for the current user
 router.get("/v1/likes", async (req: any, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.json({ updateIds: [], newsIds: [] });
+    res.json({ updateIds: [], newsIds: [], regulationIds: [] });
     return;
   }
 
@@ -20,8 +20,9 @@ router.get("/v1/likes", async (req: any, res) => {
 
     const updateIds = rows.filter(r => r.itemType === "update").map(r => r.itemId);
     const newsIds = rows.filter(r => r.itemType === "news").map(r => r.itemId);
+    const regulationIds = rows.filter(r => r.itemType === "regulation").map(r => r.itemId);
 
-    res.json({ updateIds, newsIds });
+    res.json({ updateIds, newsIds, regulationIds });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch likes" });
   }
@@ -30,7 +31,7 @@ router.get("/v1/likes", async (req: any, res) => {
 // GET /v1/likes/items — return full liked items
 router.get("/v1/likes/items", async (req: any, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
-    res.json({ updates: [], news: [] });
+    res.json({ updates: [], news: [], regulations: [] });
     return;
   }
 
@@ -43,8 +44,9 @@ router.get("/v1/likes/items", async (req: any, res) => {
 
     const updateIds = rows.filter(r => r.itemType === "update").map(r => r.itemId);
     const newsIds = rows.filter(r => r.itemType === "news").map(r => r.itemId);
+    const regulationIds = rows.filter(r => r.itemType === "regulation").map(r => r.itemId);
 
-    const [updates, news] = await Promise.all([
+    const [updates, news, regulations] = await Promise.all([
       updateIds.length > 0
         ? db
             .select({
@@ -62,6 +64,12 @@ router.get("/v1/likes/items", async (req: any, res) => {
             .select({ item: newsItemsTable })
             .from(newsItemsTable)
             .where(inArray(newsItemsTable.id, newsIds))
+        : Promise.resolve([]),
+      regulationIds.length > 0
+        ? db
+            .select()
+            .from(regulationItemsTable)
+            .where(inArray(regulationItemsTable.id, regulationIds))
         : Promise.resolve([]),
     ]);
 
@@ -105,14 +113,33 @@ router.get("/v1/likes/items", async (req: any, res) => {
       sourceType: row.item.sourceType,
     }));
 
-    res.json({ updates: likedUpdates, news: likedNews });
+    const likedRegulations = regulations.map(item => ({
+      id: item.id,
+      title: item.title,
+      summary: item.summary,
+      whyItMatters: item.whyItMatters,
+      regulationType: item.regulationType,
+      jurisdiction: item.jurisdiction,
+      jurisdictionDetail: item.jurisdictionDetail,
+      urgency: item.urgency,
+      deadlineDate: item.deadlineDate,
+      deadlineLabel: item.deadlineLabel,
+      detectedAt: item.detectedAt.toISOString(),
+      lastVerified: item.lastVerified.toISOString(),
+      relevance: item.relevance,
+      affectedVendors: item.affectedVendors,
+      sourceUrl: item.sourceUrl,
+      sourceName: item.sourceName,
+    }));
+
+    res.json({ updates: likedUpdates, news: likedNews, regulations: likedRegulations });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch liked items" });
   }
 });
 
 const likeBodySchema = z.object({
-  itemType: z.enum(["update", "news"]),
+  itemType: z.enum(["update", "news", "regulation"]),
   itemId: z.number().int().positive(),
 });
 
@@ -148,10 +175,10 @@ router.delete("/v1/likes/:itemType/:itemId", async (req: any, res) => {
     return;
   }
 
-  const itemType = req.params.itemType as "update" | "news";
+  const itemType = req.params.itemType as "update" | "news" | "regulation";
   const itemId = parseInt(req.params.itemId, 10);
 
-  if (!["update", "news"].includes(itemType) || isNaN(itemId)) {
+  if (!["update", "news", "regulation"].includes(itemType) || isNaN(itemId)) {
     res.status(400).json({ error: "Invalid params" });
     return;
   }

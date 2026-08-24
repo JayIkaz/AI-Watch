@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { format, formatDistanceToNow, isBefore, parseISO, startOfToday } from "date-fns";
-import { CalendarClock, Filter, Scale, X } from "lucide-react";
-import { useListVendors, getListVendorsQueryKey } from "@workspace/api-client-react";
+import { CalendarClock, Filter, Loader2, Scale, X } from "lucide-react";
+import {
+  useListVendors, getListVendorsQueryKey,
+  useListRegulations, getListRegulationsQueryKey,
+  type RegulationItem,
+} from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { RegulationCard } from "@/components/RegulationCard";
 import { cn } from "@/lib/utils";
@@ -9,11 +13,9 @@ import {
   ALL_JURISDICTIONS,
   ALL_REGULATION_TYPES,
   JURISDICTION_CONFIG,
-  REGULATION_ITEMS,
   REGULATION_TYPE_CONFIG,
   vendorLabelFromSlug,
   type Jurisdiction,
-  type RegulationItem,
   type RegulationType,
 } from "@/data/regulations";
 
@@ -24,8 +26,8 @@ function ComplianceCalendar({
   onSelect,
 }: {
   entries: RegulationItem[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
+  selectedId: number | null;
+  onSelect: (id: number) => void;
 }) {
   if (entries.length === 0) return null;
   return (
@@ -124,7 +126,12 @@ export default function RegulationPolicy() {
   const [selectedJurisdictions, setSelectedJurisdictions] = useState<Set<Jurisdiction>>(new Set());
   const [selectedStates, setSelectedStates] = useState<Set<string>>(new Set());
   const [selectedVendors, setSelectedVendors] = useState<Set<string>>(new Set());
-  const [calendarItemId, setCalendarItemId] = useState<string | null>(null);
+  const [calendarItemId, setCalendarItemId] = useState<number | null>(null);
+
+  const { data: regulationsData, isLoading } = useListRegulations({ limit: 100 }, {
+    query: { queryKey: getListRegulationsQueryKey({ limit: 100 }), staleTime: 60 * 1000 },
+  });
+  const REGULATION_ITEMS = regulationsData?.regulations ?? [];
 
   const { data: vendorsData } = useListVendors({}, {
     query: { queryKey: getListVendorsQueryKey({}), staleTime: 5 * 60 * 1000, retry: false },
@@ -159,7 +166,7 @@ export default function RegulationPolicy() {
   };
 
   const matchesVendor = (i: RegulationItem, vendors: Set<string>) =>
-    vendors.size === 0 || i.affectedVendors.some(v => vendors.has(v));
+    vendors.size === 0 || (i.affectedVendors ?? []).some(v => vendors.has(v));
 
   const filtered = useMemo(() => {
     if (calendarItemId) {
@@ -170,7 +177,7 @@ export default function RegulationPolicy() {
       matchesJurisdiction(i, selectedJurisdictions, selectedStates) &&
       matchesVendor(i, selectedVendors)
     );
-  }, [calendarItemId, selectedTypes, selectedJurisdictions, selectedStates, selectedVendors]);
+  }, [regulationsData, calendarItemId, selectedTypes, selectedJurisdictions, selectedStates, selectedVendors]);
 
   // Faceted counts: each facet's counts ignore its own selections but apply the others.
   const typeCounts = useMemo(() => {
@@ -178,14 +185,14 @@ export default function RegulationPolicy() {
       matchesJurisdiction(i, selectedJurisdictions, selectedStates) && matchesVendor(i, selectedVendors)
     );
     return new Map(ALL_REGULATION_TYPES.map(t => [t, base.filter(i => i.regulationType === t).length]));
-  }, [selectedJurisdictions, selectedStates, selectedVendors]);
+  }, [regulationsData, selectedJurisdictions, selectedStates, selectedVendors]);
 
   const jurisdictionCounts = useMemo(() => {
     const base = REGULATION_ITEMS.filter(i =>
       matchesType(i, selectedTypes) && matchesVendor(i, selectedVendors)
     );
     return new Map(ALL_JURISDICTIONS.map(j => [j, base.filter(i => i.jurisdiction === j).length]));
-  }, [selectedTypes, selectedVendors]);
+  }, [regulationsData, selectedTypes, selectedVendors]);
 
   const stateOptions = useMemo(() => {
     const states = new Set<string>();
@@ -193,20 +200,20 @@ export default function RegulationPolicy() {
       if (i.jurisdiction === "us_state" && i.jurisdictionDetail) states.add(i.jurisdictionDetail);
     });
     return [...states].sort();
-  }, []);
+  }, [regulationsData]);
 
   const vendorOptions = useMemo(() => {
     const slugs = new Set<string>();
-    REGULATION_ITEMS.forEach(i => i.affectedVendors.forEach(v => slugs.add(v)));
+    REGULATION_ITEMS.forEach(i => (i.affectedVendors ?? []).forEach(v => slugs.add(v)));
     return [...slugs].sort();
-  }, []);
+  }, [regulationsData]);
 
   const vendorCounts = useMemo(() => {
     const base = REGULATION_ITEMS.filter(i =>
       matchesType(i, selectedTypes) && matchesJurisdiction(i, selectedJurisdictions, selectedStates)
     );
-    return new Map(vendorOptions.map(v => [v, base.filter(i => i.affectedVendors.includes(v)).length]));
-  }, [selectedTypes, selectedJurisdictions, selectedStates, vendorOptions]);
+    return new Map(vendorOptions.map(v => [v, base.filter(i => (i.affectedVendors ?? []).includes(v)).length]));
+  }, [regulationsData, selectedTypes, selectedJurisdictions, selectedStates, vendorOptions]);
 
   const upcomingDeadlines = useMemo(() => {
     const today = startOfToday();
@@ -214,7 +221,7 @@ export default function RegulationPolicy() {
       .filter(i => i.deadlineDate && !isBefore(parseISO(i.deadlineDate), today))
       .sort((a, b) => a.deadlineDate!.localeCompare(b.deadlineDate!))
       .slice(0, 5);
-  }, []);
+  }, [regulationsData]);
 
   const hasActiveFilters =
     selectedTypes.size > 0 ||
@@ -324,7 +331,11 @@ export default function RegulationPolicy() {
           )}
 
           {/* Feed */}
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20 text-muted-foreground">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground bg-card/30 border border-dashed border-border rounded-2xl">
               <Scale className="w-12 h-12 mb-4 opacity-20" />
               <p className="text-lg font-medium text-foreground mb-1">No regulatory signals match these filters</p>

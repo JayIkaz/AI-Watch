@@ -8,6 +8,7 @@ import apiKeysRouter from "./apikeys";
 import ingestionRouter from "./ingestion";
 import newsRouter from "./news";
 import likesRouter from "./likes";
+import regulationsRouter from "./regulations";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(apiKeysRouter);
 router.use(ingestionRouter);
 router.use(newsRouter);
 router.use(likesRouter);
+router.use(regulationsRouter);
 
 export default router;

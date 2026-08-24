@@ -98,6 +98,64 @@ export interface ListNewsResponse {
   total: number;
 }
 
+export type RegulationType =
+  (typeof RegulationType)[keyof typeof RegulationType];
+
+export const RegulationType = {
+  legislation: "legislation",
+  enforcement: "enforcement",
+  guidance: "guidance",
+  court_ruling: "court_ruling",
+  standards: "standards",
+  executive_action: "executive_action",
+} as const;
+
+export type Jurisdiction = (typeof Jurisdiction)[keyof typeof Jurisdiction];
+
+export const Jurisdiction = {
+  eu: "eu",
+  us_federal: "us_federal",
+  us_state: "us_state",
+  uk: "uk",
+  china: "china",
+  international: "international",
+} as const;
+
+export type RegulationUrgency =
+  (typeof RegulationUrgency)[keyof typeof RegulationUrgency];
+
+export const RegulationUrgency = {
+  deadline_approaching: "deadline_approaching",
+  enforcement_live: "enforcement_live",
+  proposed_draft: "proposed_draft",
+  adopted_future: "adopted_future",
+} as const;
+
+export interface RegulationItem {
+  id: number;
+  title: string;
+  summary?: string | null;
+  whyItMatters?: string | null;
+  regulationType: RegulationType;
+  jurisdiction: Jurisdiction;
+  jurisdictionDetail?: string | null;
+  urgency: RegulationUrgency;
+  deadlineDate?: string | null;
+  deadlineLabel?: string | null;
+  detectedAt: string;
+  lastVerified: string;
+  relevance?: number | null;
+  affectedVendors?: string[] | null;
+  sourceUrl?: string | null;
+  sourceName?: string | null;
+  deduplicationHash?: string | null;
+}
+
+export interface ListRegulationsResponse {
+  regulations: RegulationItem[];
+  total: number;
+}
+
 export interface NewsStatus {
   isRunning: boolean;
   lastRunAt?: string | null;
@@ -357,6 +415,32 @@ export type ListNewsParams = {
   highInterest?: boolean;
   keyword?: string;
   vendor?: string;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /**
+   * @minimum 0
+   */
+  offset?: number;
+};
+
+export type ListRegulationsParams = {
+  /**
+   * Filter by regulation type (comma-separated for multiple)
+   */
+  regulationType?: string;
+  /**
+   * Filter by jurisdiction (comma-separated for multiple)
+   */
+  jurisdiction?: string;
+  /**
+   * Filter by compliance-urgency status (comma-separated for multiple)
+   */
+  urgency?: string;
+  vendor?: string;
+  keyword?: string;
   /**
    * @minimum 1
    * @maximum 100

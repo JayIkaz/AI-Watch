@@ -370,6 +370,87 @@ export const ListNewsResponse = zod.object({
 });
 
 /**
+ * @summary List AI regulation & policy items with optional filters
+ */
+export const listRegulationsQueryLimitDefault = 20;
+export const listRegulationsQueryLimitMax = 100;
+
+export const listRegulationsQueryOffsetDefault = 0;
+export const listRegulationsQueryOffsetMin = 0;
+
+export const ListRegulationsQueryParams = zod.object({
+  regulationType: zod.coerce
+    .string()
+    .optional()
+    .describe("Filter by regulation type (comma-separated for multiple)"),
+  jurisdiction: zod.coerce
+    .string()
+    .optional()
+    .describe("Filter by jurisdiction (comma-separated for multiple)"),
+  urgency: zod.coerce
+    .string()
+    .optional()
+    .describe(
+      "Filter by compliance-urgency status (comma-separated for multiple)",
+    ),
+  vendor: zod.coerce.string().optional(),
+  keyword: zod.coerce.string().optional(),
+  limit: zod.coerce
+    .number()
+    .min(1)
+    .max(listRegulationsQueryLimitMax)
+    .default(listRegulationsQueryLimitDefault),
+  offset: zod.coerce
+    .number()
+    .min(listRegulationsQueryOffsetMin)
+    .default(listRegulationsQueryOffsetDefault),
+});
+
+export const ListRegulationsResponse = zod.object({
+  regulations: zod.array(
+    zod.object({
+      id: zod.number(),
+      title: zod.string(),
+      summary: zod.string().nullish(),
+      whyItMatters: zod.string().nullish(),
+      regulationType: zod.enum([
+        "legislation",
+        "enforcement",
+        "guidance",
+        "court_ruling",
+        "standards",
+        "executive_action",
+      ]),
+      jurisdiction: zod.enum([
+        "eu",
+        "us_federal",
+        "us_state",
+        "uk",
+        "china",
+        "international",
+      ]),
+      jurisdictionDetail: zod.string().nullish(),
+      urgency: zod.enum([
+        "deadline_approaching",
+        "enforcement_live",
+        "proposed_draft",
+        "adopted_future",
+      ]),
+      deadlineDate: zod.date().nullish(),
+      deadlineLabel: zod.string().nullish(),
+      detectedAt: zod.date(),
+      lastVerified: zod.date(),
+      relevance: zod.number().nullish(),
+      affectedVendors: zod.array(zod.string()).nullish(),
+      sourceUrl: zod.string().nullish(),
+      sourceName: zod.string().nullish(),
+      deduplicationHash: zod.string().nullish(),
+    }),
+  ),
+  total: zod.number(),
+});
+
+/**
  * @summary Manually trigger the news ingestion pipeline
  */
 export const TriggerNewsIngestionResponse = zod.object({

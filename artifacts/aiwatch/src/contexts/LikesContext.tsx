@@ -15,16 +15,27 @@ async function authHeaders(): Promise<HeadersInit> {
 export const LIKES_QK = ["/api/v1/likes"] as const;
 export const LIKED_ITEMS_QK = ["/api/v1/likes/items"] as const;
 
+type LikeType = "update" | "news" | "regulation";
+
+// Maps a like type to its field name in the LikeIds/toggle payload shape.
+const FIELD: Record<LikeType, keyof LikeIds> = {
+  update: "updateIds",
+  news: "newsIds",
+  regulation: "regulationIds",
+};
+
 interface LikesContextValue {
   likedUpdateIds: Set<number>;
   likedNewsIds: Set<number>;
-  isLiked: (type: "update" | "news", id: number) => boolean;
-  toggle: (type: "update" | "news", id: number) => Promise<void>;
+  likedRegulationIds: Set<number>;
+  isLiked: (type: LikeType, id: number) => boolean;
+  toggle: (type: LikeType, id: number) => Promise<void>;
 }
 
 const LikesContext = createContext<LikesContextValue>({
   likedUpdateIds: new Set(),
   likedNewsIds: new Set(),
+  likedRegulationIds: new Set(),
   isLiked: () => false,
   toggle: async () => {},
 });
@@ -41,7 +52,7 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
     queryKey: LIKES_QK,
     queryFn: async ({ signal }) => {
       const res = await fetch("/api/v1/likes", { signal, headers: await authHeaders() });
-      if (!res.ok) return { updateIds: [], newsIds: [] };
+      if (!res.ok) return { updateIds: [], newsIds: [], regulationIds: [] };
       return res.json();
     },
     enabled: !!user,
@@ -50,15 +61,18 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
 
   const likedUpdateIds = new Set<number>(data?.updateIds ?? []);
   const likedNewsIds = new Set<number>(data?.newsIds ?? []);
+  const likedRegulationIds = new Set<number>(data?.regulationIds ?? []);
+
+  const likedSetFor = (type: LikeType) =>
+    type === "update" ? likedUpdateIds : type === "news" ? likedNewsIds : likedRegulationIds;
 
   const isLiked = useCallback(
-    (type: "update" | "news", id: number) =>
-      type === "update" ? likedUpdateIds.has(id) : likedNewsIds.has(id),
+    (type: LikeType, id: number) => likedSetFor(type).has(id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data]
   );
 
-  const toggle = useCallback(async (type: "update" | "news", id: number) => {
+  const toggle = useCallback(async (type: LikeType, id: number) => {
     if (!user) {
       toast({
         title: "Log in to save items",
@@ -72,21 +86,17 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const currently = type === "update" ? likedUpdateIds.has(id) : likedNewsIds.has(id);
+    const field = FIELD[type];
+    const currently = likedSetFor(type).has(id);
 
     qc.setQueryData<LikeIds>(LIKES_QK, (old) => {
       if (!old) return old;
-      if (currently) {
-        return {
-          updateIds: type === "update" ? old.updateIds.filter(x => x !== id) : old.updateIds,
-          newsIds: type === "news" ? old.newsIds.filter(x => x !== id) : old.newsIds,
-        };
-      } else {
-        return {
-          updateIds: type === "update" ? [...old.updateIds, id] : old.updateIds,
-          newsIds: type === "news" ? [...old.newsIds, id] : old.newsIds,
-        };
-      }
+      return {
+        ...old,
+        [field]: currently
+          ? old[field].filter(x => x !== id)
+          : [...old[field], id],
+      };
     });
 
     try {
@@ -108,7 +118,7 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
   }, [data, qc, user, toast]);
 
   return (
-    <LikesContext.Provider value={{ likedUpdateIds, likedNewsIds, isLiked, toggle }}>
+    <LikesContext.Provider value={{ likedUpdateIds, likedNewsIds, likedRegulationIds, isLiked, toggle }}>
       {children}
     </LikesContext.Provider>
   );

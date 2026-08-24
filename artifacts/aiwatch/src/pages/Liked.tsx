@@ -3,9 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { useLikes, LIKED_ITEMS_QK } from "@/contexts/LikesContext";
 import { UpdateCard } from "@/components/UpdateCard";
+import { RegulationCard } from "@/components/RegulationCard";
 import type { Update } from "@workspace/api-client-react";
 import type { LikedItems, LikedNews } from "@/lib/likesTypes";
-import { Heart, Loader2, Newspaper, Activity, ExternalLink, Building2, Zap } from "lucide-react";
+import { Heart, Loader2, Newspaper, Activity, ExternalLink, Building2, Zap, Scale } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn, decodeHtml } from "@/lib/utils";
 import { Link } from "wouter";
@@ -17,7 +18,7 @@ async function authHeaders(): Promise<HeadersInit> {
   return token ? { authorization: `Bearer ${token}` } : {};
 }
 
-type Tab = "updates" | "news";
+type Tab = "updates" | "news" | "regulations";
 
 function LikedNewsCard({ item }: { item: LikedNews }) {
   const { isLiked, toggle } = useLikes();
@@ -114,7 +115,8 @@ export default function Liked() {
 
   const updates = data?.updates ?? [];
   const news = data?.news ?? [];
-  const total = updates.length + news.length;
+  const regulations = data?.regulations ?? [];
+  const total = updates.length + news.length + regulations.length;
 
   return (
     <Layout>
@@ -133,7 +135,7 @@ export default function Liked() {
 
       {/* Tabs */}
       <div className="flex items-center gap-1 mb-8 p-1 bg-card/50 border border-border rounded-2xl w-fit">
-        {(["updates", "news"] as Tab[]).map(t => (
+        {(["updates", "news", "regulations"] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -144,14 +146,14 @@ export default function Liked() {
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {t === "updates" ? <Activity className="w-4 h-4" /> : <Newspaper className="w-4 h-4" />}
-            {t === "updates" ? "Intelligence Updates" : "News & Gossip"}
+            {t === "updates" ? <Activity className="w-4 h-4" /> : t === "news" ? <Newspaper className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
+            {t === "updates" ? "Intelligence Updates" : t === "news" ? "News & Gossip" : "Regulation & Policy"}
             {!isLoading && (
               <span className={cn(
                 "text-xs px-1.5 py-0.5 rounded-full font-semibold",
                 tab === t ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
               )}>
-                {t === "updates" ? updates.length : news.length}
+                {t === "updates" ? updates.length : t === "news" ? news.length : regulations.length}
               </span>
             )}
           </button>
@@ -169,12 +171,15 @@ export default function Liked() {
           <p className="text-sm text-center max-w-sm mb-6">
             Hit the heart icon on any update or news story to save it here for later.
           </p>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap justify-center">
             <Link href="/" className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
               Browse Intelligence Feed
             </Link>
             <Link href="/news" className="px-4 py-2 rounded-xl bg-secondary border border-border text-sm font-medium hover:bg-secondary/80 transition-colors text-foreground">
               Browse News
+            </Link>
+            <Link href="/regulation" className="px-4 py-2 rounded-xl bg-secondary border border-border text-sm font-medium hover:bg-secondary/80 transition-colors text-foreground">
+              Browse Regulation & Policy
             </Link>
           </div>
         </div>
@@ -192,7 +197,7 @@ export default function Liked() {
             ))}
           </div>
         )
-      ) : (
+      ) : tab === "news" ? (
         news.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground bg-card/20 border border-dashed border-border rounded-3xl">
             <Newspaper className="w-10 h-10 mb-4 opacity-20" />
@@ -203,6 +208,20 @@ export default function Liked() {
           <div className="space-y-4">
             {news.map(item => (
               <LikedNewsCard key={item.id} item={item} />
+            ))}
+          </div>
+        )
+      ) : (
+        regulations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground bg-card/20 border border-dashed border-border rounded-3xl">
+            <Scale className="w-10 h-10 mb-4 opacity-20" />
+            <p className="text-base font-medium text-foreground mb-1">No saved regulation items</p>
+            <p className="text-sm">Save items from <Link href="/regulation" className="text-primary hover:underline">Regulation & Policy</Link> to see them here.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {regulations.map(item => (
+              <RegulationCard key={item.id} item={item} />
             ))}
           </div>
         )

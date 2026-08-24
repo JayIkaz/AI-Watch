@@ -29,6 +29,8 @@ import type {
   ListCategories200,
   ListNewsParams,
   ListNewsResponse,
+  ListRegulationsParams,
+  ListRegulationsResponse,
   ListUpdatesParams,
   ListVendors200,
   ListVendorsParams,
@@ -1296,6 +1298,100 @@ export function useListNews<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListNewsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List AI regulation & policy items with optional filters
+ */
+export const getListRegulationsUrl = (params?: ListRegulationsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/regulations?${stringifiedParams}`
+    : `/api/v1/regulations`;
+};
+
+export const listRegulations = async (
+  params?: ListRegulationsParams,
+  options?: RequestInit,
+): Promise<ListRegulationsResponse> => {
+  return customFetch<ListRegulationsResponse>(getListRegulationsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListRegulationsQueryKey = (params?: ListRegulationsParams) => {
+  return [`/api/v1/regulations`, ...(params ? [params] : [])] as const;
+};
+
+export const getListRegulationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listRegulations>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListRegulationsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listRegulations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListRegulationsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listRegulations>>> = ({
+    signal,
+  }) => listRegulations(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listRegulations>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListRegulationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listRegulations>>
+>;
+export type ListRegulationsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List AI regulation & policy items with optional filters
+ */
+
+export function useListRegulations<
+  TData = Awaited<ReturnType<typeof listRegulations>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListRegulationsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listRegulations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListRegulationsQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

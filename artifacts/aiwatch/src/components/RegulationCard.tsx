@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 import {
   Bell,
@@ -13,12 +12,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useLikes } from "@/contexts/LikesContext";
+import type { RegulationItem } from "@workspace/api-client-react";
 import {
   JURISDICTION_CONFIG,
   REGULATION_TYPE_CONFIG,
   URGENCY_CONFIG,
   vendorLabelFromSlug,
-  type RegulationItem,
 } from "@/data/regulations";
 
 interface RegulationCardProps {
@@ -28,7 +28,8 @@ interface RegulationCardProps {
 
 export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
   const { toast } = useToast();
-  const [saved, setSaved] = useState(false);
+  const { isLiked, toggle } = useLikes();
+  const saved = isLiked("regulation", item.id);
 
   const typeCfg = REGULATION_TYPE_CONFIG[item.regulationType];
   const urgencyCfg = URGENCY_CONFIG[item.urgency];
@@ -136,11 +137,11 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
       </div>
 
       {/* Affected vendors */}
-      {item.affectedVendors.length > 0 && (
+      {(item.affectedVendors ?? []).length > 0 && (
         <div className="flex items-center gap-1.5 flex-wrap mb-3">
           <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <span className="text-xs text-muted-foreground">Affects:</span>
-          {item.affectedVendors.map(slug => (
+          {(item.affectedVendors ?? []).map(slug => (
             <span key={slug} className="text-xs px-2 py-0.5 rounded-full bg-secondary border border-border text-muted-foreground">
               {vendorNames?.get(slug) ?? vendorLabelFromSlug(slug)}
             </span>
@@ -154,17 +155,14 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
           className="flex items-center gap-1 text-xs text-muted-foreground"
           title="Based on jurisdiction scope, affected vendors, and compliance impact."
         >
-          <CheckCircle2 className={cn("w-3.5 h-3.5", item.relevance > 0.8 ? "text-teal" : "text-amber")} />
-          Relevance: {Math.round(item.relevance * 100)}%
+          <CheckCircle2 className={cn("w-3.5 h-3.5", (item.relevance ?? 0) > 0.8 ? "text-teal" : "text-amber")} />
+          Relevance: {Math.round((item.relevance ?? 0) * 100)}%
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-0.5 ml-auto min-w-0">
           {/* Save */}
           <button
-            onClick={() => {
-              setSaved(v => !v);
-              toast({ title: saved ? "Removed from saved" : "Saved", description: saved ? "Item removed from your saved list." : "Regulation item saved for later." });
-            }}
+            onClick={() => toggle("regulation", item.id)}
             className={cn(
               "h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-200",
               saved
@@ -210,7 +208,7 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary transition-colors bg-secondary px-2.5 py-1.5 rounded-lg border border-transparent hover:border-primary/20 ml-0.5"
-              title={item.sourceName}
+              title={item.sourceName ?? undefined}
             >
               <span className="max-w-[8rem] truncate">{item.sourceName ?? "Source"}</span> <ExternalLink className="w-3 h-3 shrink-0" />
             </a>

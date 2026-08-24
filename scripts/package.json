@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed": "tsx ./src/seed.ts",
+    "seed-regulations": "tsx ./src/seed-regulations.ts",
     "ingest": "tsx ./src/ingest.ts",
     "backfill-logos": "tsx ./src/backfill-vendor-logos.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"

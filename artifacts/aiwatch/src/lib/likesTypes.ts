@@ -4,9 +4,12 @@
 // server responses (artifacts/api-server/src/routes/likes.ts) until the spec
 // is updated and these can be generated properly.
 
+import type { RegulationItem } from "@workspace/api-client-react";
+
 export interface LikeIds {
   updateIds: number[];
   newsIds: number[];
+  regulationIds: number[];
 }
 
 export interface LikedUpdateItem {
@@ -42,4 +45,5 @@ export interface LikedNews {
 export interface LikedItems {
   updates: LikedUpdateItem[];
   news: LikedNews[];
+  regulations: RegulationItem[];
 }

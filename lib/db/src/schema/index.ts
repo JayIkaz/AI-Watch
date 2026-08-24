@@ -8,3 +8,4 @@ export * from "./newsItems";
 export * from "./newsSources";
 export * from "./userLikes";
 export * from "./userIdMapping";
+export * from "./regulationItems";

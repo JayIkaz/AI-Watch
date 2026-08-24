@@ -3,7 +3,7 @@ import { pgTable, text, integer, timestamp, serial, uniqueIndex, index } from "d
 export const userLikesTable = pgTable("user_likes", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull(),
-  itemType: text("item_type", { enum: ["update", "news"] }).notNull(),
+  itemType: text("item_type", { enum: ["update", "news", "regulation"] }).notNull(),
   itemId: integer("item_id").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => [

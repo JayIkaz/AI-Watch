@@ -7,5 +7,6 @@ export {
   CreateApiKeyBody,
   FlagUpdateBody,
   ListNewsResponse,
+  ListRegulationsResponse,
   TriggerIngestionBody,
 } from "./generated/api";

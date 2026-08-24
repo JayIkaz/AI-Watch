@@ -15,6 +15,13 @@
       "when": 1784319968583,
       "tag": "0001_drop_replit_auth_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787571028530,
+      "tag": "0002_fine_vermin",
+      "breakpoints": true
     }
   ]
 }
