@@ -98,9 +98,20 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
       </div>
 
       {/* Title */}
-      <h3 className="font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug text-lg md:text-xl mb-2">
-        {item.title}
-      </h3>
+      {item.sourceUrl ? (
+        <a
+          href={item.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block font-display font-bold text-foreground hover:text-primary hover:underline underline-offset-2 transition-colors leading-snug text-lg md:text-xl mb-2"
+        >
+          {item.title}
+        </a>
+      ) : (
+        <h3 className="font-display font-bold text-foreground leading-snug text-lg md:text-xl mb-2">
+          {item.title}
+        </h3>
+      )}
 
       {/* Summary */}
       <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-3">

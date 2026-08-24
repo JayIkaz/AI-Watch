@@ -221,9 +221,20 @@ function NewsCard({ item }: { item: NewsItem }) {
         </div>
 
         {/* Title */}
-        <h3 className="text-base md:text-lg font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
-          {decodeHtml(item.title)}
-        </h3>
+        {item.sourceUrl ? (
+          <a
+            href={item.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-base md:text-lg font-display font-bold text-foreground hover:text-primary hover:underline underline-offset-2 transition-colors leading-snug"
+          >
+            {decodeHtml(item.title)}
+          </a>
+        ) : (
+          <h3 className="text-base md:text-lg font-display font-bold text-foreground leading-snug">
+            {decodeHtml(item.title)}
+          </h3>
+        )}
 
         {/* What happened */}
         {item.summary && (
@@ -351,12 +362,26 @@ function NewsCard({ item }: { item: NewsItem }) {
 
         {/* Footer: source + actions */}
         <div className="border-t border-border/40 pt-3 flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Newspaper className="w-3.5 h-3.5 shrink-0" />
-            <span className="font-medium text-foreground/70">{item.sourceName}</span>
-            <span className="text-muted-foreground/40">·</span>
-            <span>{SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType}</span>
-          </div>
+          {item.sourceUrl ? (
+            <a
+              href={item.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Newspaper className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-medium text-foreground/70 hover:underline underline-offset-2">{item.sourceName}</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span>{SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType}</span>
+            </a>
+          ) : (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Newspaper className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-medium text-foreground/70">{item.sourceName}</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span>{SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType}</span>
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center justify-end gap-0.5 ml-auto min-w-0">
             {/* Save */}

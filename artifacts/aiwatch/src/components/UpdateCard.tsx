@@ -133,12 +133,26 @@ export function UpdateCard({ update }: UpdateCardProps) {
       </div>
 
       {/* Title */}
-      <h3 className={cn(
-        "font-display font-bold text-foreground group-hover:text-primary transition-colors leading-snug",
-        compact ? "text-base mb-2" : "text-lg md:text-xl mb-2"
-      )}>
-        {decodeHtml(update.title)}
-      </h3>
+      {update.sourceUrl ? (
+        <a
+          href={update.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            "block font-display font-bold text-foreground hover:text-primary hover:underline underline-offset-2 transition-colors leading-snug",
+            compact ? "text-base mb-2" : "text-lg md:text-xl mb-2"
+          )}
+        >
+          {decodeHtml(update.title)}
+        </a>
+      ) : (
+        <h3 className={cn(
+          "font-display font-bold text-foreground leading-snug",
+          compact ? "text-base mb-2" : "text-lg md:text-xl mb-2"
+        )}>
+          {decodeHtml(update.title)}
+        </h3>
+      )}
 
       {/* Summary */}
       {update.summary && (
