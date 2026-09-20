@@ -9,3 +9,5 @@ export * from "./newsSources";
 export * from "./userLikes";
 export * from "./userIdMapping";
 export * from "./regulationItems";
+export * from "./vendorAliases";
+export * from "./newsItemVendors";
