@@ -1,5 +1,5 @@
-import { db, newsItemsTable, newsSourcesTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, newsItemsTable, newsSourcesTable, newsItemVendorsTable, vendorAliasesTable } from "@workspace/db";
+import { eq, inArray } from "drizzle-orm";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import crypto from "crypto";
 import { fetchFeedItems } from "./rss";
@@ -10,6 +10,37 @@ const KNOWN_AI_VENDORS = [
   "Replicate", "AWS", "Amazon", "Azure", "Microsoft", "Cursor", "GitHub Copilot",
   "Together AI", "Claude", "GPT", "Gemini", "Llama", "Grok",
 ];
+
+// Resolve the classifier's free-text vendor mentions onto canonical vendors and
+// record them in news_item_vendors.
+//
+// The classifier emits whatever wording it likes ("Claude", "ChatGPT",
+// "HuggingFace", "Grok"), none of which matches vendors.name, so mentioned_vendors
+// alone leaves items unattributed. vendor_aliases holds the mapping; see
+// lib/db/runbooks/backfill-news-item-vendors.sql for the seed and the backfill of
+// items ingested before this existed.
+//
+// Matching is exact on the lower-cased alias, never substring: substring matching
+// maps "GPT" onto every ChatGPT story and "Meta" onto "metadata".
+async function attributeVendors(newsItemId: number, mentions: string[]): Promise<void> {
+  const aliases = [...new Set(mentions.map(m => m.trim().toLowerCase()).filter(Boolean))];
+  if (aliases.length === 0) return;
+
+  const matched = await db
+    .select({ vendorId: vendorAliasesTable.vendorId })
+    .from(vendorAliasesTable)
+    .where(inArray(vendorAliasesTable.alias, aliases));
+
+  // Several aliases can resolve to the same vendor ("anthropic" and "claude"),
+  // which would collide on the composite primary key within one statement.
+  const vendorIds = [...new Set(matched.map(r => r.vendorId))];
+  if (vendorIds.length === 0) return;
+
+  await db
+    .insert(newsItemVendorsTable)
+    .values(vendorIds.map(vendorId => ({ newsItemId, vendorId })))
+    .onConflictDoNothing();
+}
 
 function ruleBasedClassifyNews(title: string, content: string, sourceName: string, sourceType: string): {
   summary: string;
@@ -149,7 +180,7 @@ export async function runNewsIngestion(): Promise<{ processed: number; created: 
             classification = ruleBasedClassifyNews(item.title, item.content, source.name, source.sourceType);
           }
 
-          await db.insert(newsItemsTable).values({
+          const [inserted] = await db.insert(newsItemsTable).values({
             title: item.title,
             summary: classification.summary,
             rawContent: item.content,
@@ -162,8 +193,19 @@ export async function runNewsIngestion(): Promise<{ processed: number; created: 
             publishedAt: item.publishedAt,
             highInterest: classification.highInterest,
             deduplicationHash: hash,
-          });
+          }).returning({ id: newsItemsTable.id });
           created++;
+
+          // Attribution is secondary to the item itself: a failure here must not
+          // lose an item that was successfully stored, nor count against the run's
+          // error total, so it is caught separately and only logged.
+          if (inserted) {
+            try {
+              await attributeVendors(inserted.id, classification.mentionedVendors);
+            } catch (attrErr) {
+              console.error("[news-ingestion] attribution error:", String(attrErr));
+            }
+          }
         } catch (itemErr) {
           console.error("[news-ingestion] item error:", String(itemErr));
           errors++;
