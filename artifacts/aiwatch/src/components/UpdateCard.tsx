@@ -6,7 +6,7 @@ import {
   ShieldAlert, ThumbsUp, ThumbsDown, Bell, Zap,
   ChevronDown, ChevronUp, Users
 } from "lucide-react";
-import { cn, getCategoryColor, decodeHtml } from "@/lib/utils";
+import { cn, decodeHtml } from "@/lib/utils";
 import { useFeedPrefs } from "@/contexts/FeedPrefsContext";
 import { useLikes } from "@/contexts/LikesContext";
 import { useToast } from "@/hooks/use-toast";
@@ -28,11 +28,11 @@ function getCredibilityBadge(update: Update) {
   return           { label: "Unconfirmed",             color: "text-muted-foreground bg-muted/30 border-border" };
 }
 
-function getImpact(update: Update): { label: string; color: string } {
-  if (update.highImpact) return { label: "High impact", color: "text-primary bg-primary/10 border-primary/30" };
+function getImpact(update: Update): string {
+  if (update.highImpact) return "High impact";
   const s = update.confidenceScore ?? 0;
-  if (s >= 0.6)  return { label: "Medium impact", color: "text-amber bg-amber/10 border-amber/20" };
-  return           { label: "Low impact",    color: "text-muted-foreground bg-muted/20 border-border" };
+  if (s >= 0.6)  return "Medium impact";
+  return "Low impact";
 }
 
 function getRecommendedAction(slug: string): string {
@@ -84,11 +84,6 @@ export function UpdateCard({ update }: UpdateCardProps) {
         ? "border-l-[3px] border-l-primary border-t border-r border-b border-primary/25 hover:border-primary/40 shadow-[0_0_0_1px_hsl(var(--primary)/0.06)]"
         : "border-border hover:border-primary/30"
     )}>
-      {update.highImpact && (
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.04] via-transparent to-transparent rounded-2xl pointer-events-none" />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
-
       {/* Top row: vendor + meta + badges */}
       <div className={cn("flex items-start justify-between gap-3", compact ? "mb-2" : "mb-3")}>
         <div className="flex items-center gap-3 min-w-0">
@@ -109,9 +104,10 @@ export function UpdateCard({ update }: UpdateCardProps) {
               {update.vendor.name}
             </Link>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className={cn("text-xs px-2 py-0.5 rounded-full border font-medium shrink-0", getCategoryColor(update.category.slug))}>
+              <span className="text-xs font-medium text-muted-foreground shrink-0">
                 {update.category.name}
               </span>
+              <span aria-hidden="true" className="text-xs text-muted-foreground">·</span>
               <span className="text-xs text-muted-foreground shrink-0" title={new Date(update.detectedAt).toLocaleString()}>
                 {formatDistanceToNow(new Date(update.detectedAt), { addSuffix: true })}
               </span>
@@ -121,7 +117,7 @@ export function UpdateCard({ update }: UpdateCardProps) {
 
         <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
           {update.highImpact && (
-            <div className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+            <div className="flex items-center gap-1 text-xs font-semibold text-primary">
               <Zap className="w-3 h-3" />
               High impact
             </div>
@@ -189,17 +185,11 @@ export function UpdateCard({ update }: UpdateCardProps) {
           <div className="flex items-center gap-2">
             <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <span className="text-xs text-muted-foreground">Who should care:</span>
-            <div className="flex gap-1.5 flex-wrap">
-              {audience.map(a => (
-                <span key={a} className="text-xs px-2 py-0.5 rounded-full bg-secondary border border-border text-muted-foreground">
-                  {a}
-                </span>
-              ))}
-            </div>
+            <span className="text-xs text-foreground">{audience.join(", ")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Recommended action:</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-secondary border border-border text-foreground font-medium">
+            <span className="text-xs text-foreground font-medium">
               {action}
             </span>
           </div>
@@ -225,8 +215,8 @@ export function UpdateCard({ update }: UpdateCardProps) {
         <div className="flex flex-wrap items-center gap-3 min-w-0">
           {/* Impact badge (only when not high-impact, to avoid repeat) */}
           {!update.highImpact && !compact && (
-            <span className={cn("text-xs px-2 py-0.5 rounded-full border font-medium", impact.color)}>
-              {impact.label}
+            <span className="text-xs font-medium text-muted-foreground">
+              {impact}
             </span>
           )}
           {/* Relevance score */}

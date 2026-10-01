@@ -362,7 +362,7 @@ export default function Feed() {
 
         {/* Filters Sidebar */}
         <div className="w-full lg:w-72 shrink-0">
-          <div className="sticky top-6 flex flex-col max-h-[calc(100vh-5rem)] bg-card/50 backdrop-blur-sm border border-border rounded-2xl shadow-lg overflow-hidden">
+          <div className="sticky top-6 flex flex-col max-h-[calc(100vh-5rem)] bg-card border border-border rounded-2xl shadow-lg overflow-hidden">
             <div className="flex items-center gap-2 px-5 py-4 border-b border-border/60 text-foreground font-display font-bold shrink-0">
               <Filter className="w-4 h-4 text-primary" />
               Filters

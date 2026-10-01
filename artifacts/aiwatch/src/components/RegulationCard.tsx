@@ -54,11 +54,6 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
         ? "border-l-[3px] border-l-raspberry border-t border-r border-b border-raspberry/25 hover:border-raspberry/40 shadow-[0_0_0_1px_hsl(var(--raspberry)/0.06)]"
         : "border-border hover:border-primary/30"
     )}>
-      {isDeadline && (
-        <div className="absolute inset-0 bg-gradient-to-r from-raspberry/[0.04] via-transparent to-transparent rounded-2xl pointer-events-none" />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
-
       {/* Top row: type icon + jurisdiction + meta + badges */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -70,14 +65,14 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
               {jurisdictionLabel}
             </span>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className={cn("text-xs px-2 py-0.5 rounded-full border font-medium shrink-0", typeCfg.color, typeCfg.bg, typeCfg.border)}>
+              <span className="text-xs font-medium text-muted-foreground shrink-0">
                 {typeCfg.label}
               </span>
               <span className="text-xs text-muted-foreground shrink-0" title={new Date(item.detectedAt).toLocaleString()}>
                 {formatDistanceToNow(parseISO(item.detectedAt), { addSuffix: true })}
               </span>
               <span
-                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/70 bg-muted/30 border border-border/50 px-1.5 py-0.5 rounded-full shrink-0"
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/70 shrink-0"
                 title={`Status last verified ${new Date(item.lastVerified).toLocaleString()}`}
               >
                 <ShieldCheck className="w-3 h-3" />
@@ -92,7 +87,7 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
             <UrgencyIcon className="w-3 h-3" />
             {urgencyLabel}
           </span>
-          <span className="text-xs px-2 py-0.5 rounded-full border font-medium text-sky bg-sky/10 border-sky/20">
+          <span className="text-xs font-medium text-sky">
             Confirmed
           </span>
         </div>
@@ -141,11 +136,9 @@ export function RegulationCard({ item, vendorNames }: RegulationCardProps) {
         <div className="flex items-center gap-1.5 flex-wrap mb-3">
           <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <span className="text-xs text-muted-foreground">Affects:</span>
-          {(item.affectedVendors ?? []).map(slug => (
-            <span key={slug} className="text-xs px-2 py-0.5 rounded-full bg-secondary border border-border text-muted-foreground">
-              {vendorNames?.get(slug) ?? vendorLabelFromSlug(slug)}
-            </span>
-          ))}
+          <span className="text-xs text-foreground">
+            {(item.affectedVendors ?? []).map(slug => vendorNames?.get(slug) ?? vendorLabelFromSlug(slug)).join(", ")}
+          </span>
         </div>
       )}
 

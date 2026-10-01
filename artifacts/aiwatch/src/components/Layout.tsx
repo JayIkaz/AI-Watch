@@ -72,7 +72,7 @@ function SidebarContent({
     <>
       {/* Logo */}
       <div className="p-6 flex items-center gap-3 shrink-0">
-        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-[0_0_15px_hsl(var(--primary)/0.15)]">
+        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 border border-primary/20">
           <img
             src={`${import.meta.env.BASE_URL}images/logo.png`}
             alt="Aukizan"
@@ -80,7 +80,7 @@ function SidebarContent({
           />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="font-display font-bold text-xl tracking-tight text-glow text-foreground leading-tight">
+          <span className="font-display font-bold text-xl tracking-tight text-foreground leading-tight">
             Aukizan
           </span>
           <span className="text-[10px] text-muted-foreground/70 leading-tight truncate">
@@ -173,7 +173,7 @@ function SidebarContent({
             </div>
             <div className="flex items-center gap-2 text-foreground">
               <div className={cn(
-                "w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]",
+                "w-2 h-2 rounded-full",
                 ingestionStatus.isRunning ? "bg-primary text-primary animate-pulse" : "bg-muted-foreground text-muted-foreground"
               )} />
               {ingestionStatus.isRunning ? "Ingesting updates..." : "Idle"}
@@ -314,7 +314,7 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row text-foreground overflow-hidden">
 
       {/* ── Desktop sidebar (hidden on mobile) ─────────────────────────────── */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 border-r border-border bg-card/30 backdrop-blur-md flex-col z-20 h-screen sticky top-0">
+      <aside className="hidden md:flex w-64 flex-shrink-0 border-r border-border bg-card flex-col z-20 h-screen sticky top-0">
         <SidebarContent {...sidebarProps} />
       </aside>
 
@@ -329,7 +329,7 @@ export function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/60 md:hidden"
               onClick={() => setDrawerOpen(false)}
             />
             {/* Drawer panel */}
@@ -362,11 +362,11 @@ export function Layout({ children }: LayoutProps) {
       <main className="flex-1 relative overflow-y-auto h-screen bg-gradient-to-br from-background via-background to-secondary/20">
 
         {/* Top header bar */}
-        <div className="sticky top-0 z-10 h-14 md:h-16 w-full bg-background/60 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 md:px-6">
+        <div className="sticky top-0 z-10 h-14 md:h-16 w-full bg-background border-b border-border flex items-center justify-between px-4 md:px-6">
 
           {/* Mobile: logo + name on the left */}
           <div className="flex items-center gap-2 md:hidden">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
               <img
                 src={`${import.meta.env.BASE_URL}images/logo.png`}
                 alt="Aukizan"
@@ -402,7 +402,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       {/* ── Mobile bottom tab bar ───────────────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-card/90 backdrop-blur-xl border-t border-border">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-card border-t border-border">
         <div className="flex items-stretch h-16">
           {BOTTOM_TABS.map(tab => {
             const isActive = location === tab.href;
@@ -424,7 +424,7 @@ export function Layout({ children }: LayoutProps) {
                     transition={{ duration: 0.2 }}
                   />
                 )}
-                <tab.icon className={cn("w-5 h-5 shrink-0", isActive && "drop-shadow-[0_0_6px_hsl(var(--primary)/0.8)]")} />
+                <tab.icon className="w-5 h-5 shrink-0" />
                 <span className="text-[10px] font-medium leading-tight">{tab.label}</span>
               </Link>
             );

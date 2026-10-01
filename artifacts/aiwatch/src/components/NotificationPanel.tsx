@@ -110,7 +110,7 @@ export function NotificationBell() {
       >
         <Bell className="w-5 h-5" />
         {totalCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 min-w-[8px] h-2 bg-primary rounded-full shadow-[0_0_10px_hsl(var(--primary)/0.8)]" />
+          <span className="absolute top-1.5 right-1.5 min-w-[8px] h-2 bg-primary rounded-full" />
         )}
         {totalCount === 0 && (
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-muted-foreground/30 rounded-full" />
@@ -124,10 +124,10 @@ export function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute right-0 top-full mt-2 w-[380px] max-h-[80vh] overflow-y-auto rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/40 z-50"
+            className="absolute right-0 top-full mt-2 w-[380px] max-h-[80vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-lg z-50"
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b border-border bg-card/80 backdrop-blur-md">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b border-border bg-card">
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-primary" />
                 <span className="font-semibold text-foreground text-sm">Notifications</span>
@@ -359,10 +359,10 @@ function NotifItem({
   href: string;
 }) {
   const dotColors = {
-    amber: "bg-amber shadow-[0_0_6px_hsl(var(--amber))]",
-    blue: "bg-sky shadow-[0_0_6px_hsl(var(--sky))]",
-    emerald: "bg-teal shadow-[0_0_6px_hsl(var(--teal))]",
-    rose: "bg-raspberry shadow-[0_0_6px_hsl(var(--raspberry))]",
+    amber: "bg-amber",
+    blue: "bg-sky",
+    emerald: "bg-teal",
+    rose: "bg-raspberry",
   };
 
   return (
