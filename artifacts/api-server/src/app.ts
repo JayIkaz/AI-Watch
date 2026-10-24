@@ -41,6 +41,13 @@ const allowedOrigins = [
 const allowedOriginPatterns: RegExp[] = [/^https:\/\/ai-watch-aiwatch-[a-z0-9-]+-aukizan\.vercel\.app$/];
 
 app.use(cors({
+  // Cache the CORS preflight. Calling the API cross-origin means any request
+  // carrying a non-safelisted header (Authorization, above all) is preceded by
+  // an OPTIONS preflight. Without a max-age the browser repeats that preflight
+  // constantly, which would add back the edge requests this change removes.
+  // Browsers cap this themselves (Chrome at 2 hours); the value is an upper
+  // bound, not a promise.
+  maxAge: 86400,
   // No cookies involved (auth is a Bearer token in the Authorization header,
   // which CORS doesn't gate) — credentials:true is not needed.
   origin(origin, callback) {
