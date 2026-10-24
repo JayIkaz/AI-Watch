@@ -26,7 +26,6 @@ function LikedNewsCard({ item }: { item: LikedNews }) {
 
   return (
     <div className="group relative flex flex-col bg-card rounded-2xl border border-border p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
 
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex flex-wrap items-center gap-2">

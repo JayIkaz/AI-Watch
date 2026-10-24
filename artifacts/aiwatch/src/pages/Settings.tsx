@@ -120,7 +120,7 @@ export default function Settings() {
                   className={cn(
                     "flex flex-col items-center gap-2.5 p-4 rounded-xl border text-sm font-medium transition-all",
                     theme === value
-                      ? "border-primary bg-primary/10 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.1)]"
+                      ? "border-primary bg-primary/10 text-primary"
                       : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-border/80"
                   )}
                 >
@@ -147,7 +147,7 @@ export default function Settings() {
                   className={cn(
                     "flex flex-col items-start gap-1.5 p-4 rounded-xl border text-sm transition-all text-left",
                     density === value
-                      ? "border-primary bg-primary/10 shadow-[0_0_12px_hsl(var(--primary)/0.1)]"
+                      ? "border-primary bg-primary/10"
                       : "border-border bg-background hover:border-border/80"
                   )}
                 >

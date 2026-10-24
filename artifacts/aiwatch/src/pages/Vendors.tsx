@@ -26,8 +26,7 @@ export default function Vendors() {
           {vendorsData?.vendors?.map(vendor => (
             <Link key={vendor.id} href={`/vendors/${vendor.slug}`} className="group block">
               <div className="h-full bg-card rounded-2xl border border-border p-6 transition-all duration-300 hover:shadow-xl hover:border-primary/40 hover:-translate-y-1 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                
+
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-secondary border border-border flex items-center justify-center overflow-hidden">
                     {vendor.logoUrl ? (

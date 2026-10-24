@@ -361,7 +361,7 @@ export default function RegulationPolicy() {
         {/* ── Sidebar (desktop) ────────────────────────────────────────────── */}
         <div className="hidden lg:block w-full lg:w-72 shrink-0">
           <div className="sticky top-6 max-h-[calc(100vh-5rem)] overflow-y-auto space-y-4 pr-1">
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-lg">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-lg">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Filter className="w-4 h-4 text-primary" />

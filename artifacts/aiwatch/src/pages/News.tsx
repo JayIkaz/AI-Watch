@@ -181,26 +181,21 @@ function NewsCard({ item }: { item: NewsItem }) {
         ? "border-l-[3px] border-l-amber border-t border-r border-b border-amber/20 shadow-[0_0_0_1px_hsl(var(--amber)/0.05)]"
         : "border-border hover:border-primary/20",
     )}>
-      {item.highInterest && (
-        <div className="absolute inset-0 bg-gradient-to-r from-amber/[0.03] via-transparent to-transparent rounded-2xl pointer-events-none" />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
-
       <div className="p-5 md:p-6 flex flex-col gap-3">
 
         {/* Row 1: Badges + time */}
         <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={cn("inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border", cfg.color, cfg.bg, cfg.border)}>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
               <Icon className="w-3 h-3" />
               {cfg.label}
             </span>
-            <span className={cn("inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border", impactCfg.color, impactCfg.bg, impactCfg.border)}>
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
               <TrendingUp className="w-3 h-3" />
               {impact}
             </span>
             {item.sourceType && (
-              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border bg-secondary border-border text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                 <Newspaper className="w-3 h-3" />
                 {SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType}
               </span>
@@ -211,7 +206,7 @@ function NewsCard({ item }: { item: NewsItem }) {
                 High Interest
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border bg-secondary border-border text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               Action: {action}
             </span>
           </div>
@@ -496,7 +491,7 @@ function NewsScanStatus({ onTrigger, isPending }: { onTrigger: () => void; isPen
     : 14;
 
   return (
-    <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-4 shadow-lg">
+    <div className="bg-card border border-border rounded-2xl p-4 shadow-lg">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Radio className={cn("w-3.5 h-3.5", isRunning ? "text-primary animate-pulse" : "text-muted-foreground")} />
@@ -907,7 +902,7 @@ export default function News() {
             />
 
             {/* Filters */}
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-lg">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-lg">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-foreground">Filters</h3>
                 {hasActiveFilters && (
