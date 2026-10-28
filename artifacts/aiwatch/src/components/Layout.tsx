@@ -21,6 +21,7 @@ import { useGetMe, getGetMeQueryKey, useGetIngestionStatus, getGetIngestionStatu
 import { NotificationBell } from "./NotificationPanel";
 import { OfflineBanner } from "./OfflineBanner";
 import { NewsTicker } from "./NewsTicker";
+import { AnimatedBrand } from "./AnimatedBrand";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -72,23 +73,7 @@ function SidebarContent({
   return (
     <>
       {/* Logo */}
-      <div className="p-6 flex items-center gap-3 shrink-0">
-        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 border border-primary/20">
-          <img
-            src={`${import.meta.env.BASE_URL}images/logo.png`}
-            alt="Aukizan"
-            className="w-6 h-6 object-contain"
-          />
-        </div>
-        <div className="flex flex-col min-w-0">
-          <span className="font-display font-bold text-xl tracking-tight text-foreground leading-tight">
-            Aukizan
-          </span>
-          <span className="text-[10px] text-muted-foreground/70 leading-tight truncate">
-            AI signal, ranked by credibility
-          </span>
-        </div>
-      </div>
+      <AnimatedBrand />
 
       {/* Search */}
       <div className="px-4 pb-4 shrink-0">
