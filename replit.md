@@ -105,6 +105,7 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 ## Environment Variables
 
 - `DATABASE_URL` — PostgreSQL connection (auto-provided by Replit)
+- `DATABASE_POOL_URL` — optional. Same Supabase pooler in transaction mode (port 6543). When set, ordinary queries use it and only advisory locks use `DATABASE_URL` (session mode, port 5432). Unset means everything uses `DATABASE_URL`.
 - `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` — Anthropic proxy URL (auto via Replit AI integration)
 - `AI_INTEGRATIONS_ANTHROPIC_API_KEY` — Anthropic API key (auto via Replit AI integration)
 - `REPL_ID` — Used for Replit Auth OIDC client ID
