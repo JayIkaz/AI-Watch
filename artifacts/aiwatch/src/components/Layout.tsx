@@ -20,6 +20,7 @@ import {
 import { useGetMe, getGetMeQueryKey, useGetIngestionStatus, getGetIngestionStatusQueryKey, useTriggerIngestion } from "@workspace/api-client-react";
 import { NotificationBell } from "./NotificationPanel";
 import { OfflineBanner } from "./OfflineBanner";
+import { NewsTicker } from "./NewsTicker";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -376,8 +377,10 @@ export function Layout({ children }: LayoutProps) {
             <span className="font-display font-bold text-base tracking-tight text-foreground">Aukizan</span>
           </div>
 
-          {/* Desktop: spacer so bell stays on right */}
-          <div className="hidden md:block" />
+          {/* Desktop: rolling news ticker fills the space left of the bell */}
+          <div className="hidden md:flex flex-1 min-w-0 mr-4">
+            <NewsTicker />
+          </div>
 
           {/* Right side: notification bell + hamburger (mobile only) */}
           <div className="flex items-center gap-1">
@@ -390,6 +393,11 @@ export function Layout({ children }: LayoutProps) {
               <Menu className="w-5 h-5" />
             </button>
           </div>
+        </div>
+
+        {/* Mobile: ticker sits in its own strip under the header */}
+        <div className="md:hidden px-4 py-2 border-b border-border">
+          <NewsTicker />
         </div>
 
         {/* Offline / API-unreachable banner */}
