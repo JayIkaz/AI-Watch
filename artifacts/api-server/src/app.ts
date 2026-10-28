@@ -4,6 +4,7 @@ import { pinoHttp } from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { authMiddleware } from "./middlewares/authMiddleware";
+import { publicCache } from "./middlewares/publicCache";
 
 const app: Express = express();
 
@@ -63,6 +64,16 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
+
+// Edge caching for public read routes. None of these depend on the caller.
+// Status routes get a short window so "is ingestion running" stays current.
+const listCache = publicCache(60, 300);
+const slowCache = publicCache(300, 600);
+const statusCache = publicCache(10, 30);
+// Register specific paths before patterns: the first matching policy wins.
+app.get(["/api/v1/ingestion/status", "/api/v1/news/status"], statusCache);
+app.get(["/api/v1/vendors", "/api/v1/vendors/counts", "/api/v1/categories"], slowCache);
+app.get(["/api/v1/updates", "/api/v1/updates/:id", "/api/v1/news", "/api/v1/regulations", "/api/v1/vendors/:slug"], listCache);
 
 app.use("/api", router);
 
