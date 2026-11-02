@@ -2,6 +2,7 @@ import { pgTable, text, integer, boolean, timestamp, serial } from "drizzle-orm/
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { vendorsTable } from "./vendors";
+import { publicRead } from "./rls";
 
 export const ingestionSourcesTable = pgTable("ingestion_sources", {
   id: serial("id").primaryKey(),
@@ -14,7 +15,7 @@ export const ingestionSourcesTable = pgTable("ingestion_sources", {
   lastErrorAt: timestamp("last_error_at"),
   lastError: text("last_error"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, () => [publicRead()]).enableRLS();
 
 export const ingestionRunsTable = pgTable("ingestion_runs", {
   id: serial("id").primaryKey(),
@@ -24,7 +25,7 @@ export const ingestionRunsTable = pgTable("ingestion_runs", {
   itemsCreated: integer("items_created").notNull().default(0),
   errors: integer("errors").notNull().default(0),
   status: text("status").notNull().default("running"), // running, completed, failed
-});
+}).enableRLS();
 
 export const insertIngestionSourceSchema = createInsertSchema(ingestionSourcesTable).omit({ id: true, createdAt: true });
 export type InsertIngestionSource = z.infer<typeof insertIngestionSourceSchema>;

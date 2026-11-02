@@ -1,6 +1,7 @@
 import { pgTable, integer, timestamp, primaryKey, index } from "drizzle-orm/pg-core";
 import { vendorsTable } from "./vendors";
 import { newsItemsTable } from "./newsItems";
+import { publicRead } from "./rls";
 
 // Resolved attribution: which canonical vendors a news item is about.
 //
@@ -19,6 +20,7 @@ export const newsItemVendorsTable = pgTable("news_item_vendors", {
 }, (table) => [
   primaryKey({ columns: [table.newsItemId, table.vendorId] }),
   index("news_item_vendors_vendor_id_idx").on(table.vendorId),
-]);
+  publicRead(),
+]).enableRLS();
 
 export type NewsItemVendor = typeof newsItemVendorsTable.$inferSelect;

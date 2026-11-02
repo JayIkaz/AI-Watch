@@ -13,7 +13,7 @@ export const apiKeysTable = pgTable("api_keys", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => [
   index("api_keys_user_idx").on(t.userId),
-]);
+]).enableRLS();
 
 export const insertApiKeySchema = createInsertSchema(apiKeysTable).omit({ id: true, createdAt: true, requestCount: true });
 export type InsertApiKey = z.infer<typeof insertApiKeySchema>;

@@ -3,6 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { vendorsTable } from "./vendors";
 import { categoriesTable } from "./categories";
+import { publicRead } from "./rls";
 
 export const updatesTable = pgTable("updates", {
   id: serial("id").primaryKey(),
@@ -25,7 +26,8 @@ export const updatesTable = pgTable("updates", {
   index("updates_category_idx").on(t.categoryId),
   index("updates_detected_at_idx").on(t.detectedAt),
   index("updates_published_at_idx").on(t.publishedAt),
-]);
+  publicRead(),
+]).enableRLS();
 
 export const insertUpdateSchema = createInsertSchema(updatesTable).omit({ id: true, detectedAt: true });
 export type InsertUpdate = z.infer<typeof insertUpdateSchema>;

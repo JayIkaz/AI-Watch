@@ -9,6 +9,6 @@ export const userLikesTable = pgTable("user_likes", {
 }, (t) => [
   index("user_likes_user_idx").on(t.userId),
   uniqueIndex("user_likes_unique_idx").on(t.userId, t.itemType, t.itemId),
-]);
+]).enableRLS();
 
 export type UserLike = typeof userLikesTable.$inferSelect;

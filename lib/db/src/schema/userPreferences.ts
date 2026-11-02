@@ -10,7 +10,7 @@ export const userPreferencesTable = pgTable("user_preferences", {
   alertKeywords: text("alert_keywords").array().notNull().default([]),
   emailAlerts: boolean("email_alerts").notNull().default(false),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}).enableRLS();
 
 export const insertUserPreferencesSchema = createInsertSchema(userPreferencesTable);
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;

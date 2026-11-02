@@ -8,6 +8,6 @@ export const userIdMappingTable = pgTable("user_id_mapping", {
   oldUserId: text("old_user_id").primaryKey(),
   newUserId: uuid("new_user_id").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}).enableRLS();
 
 export type UserIdMapping = typeof userIdMappingTable.$inferSelect;

@@ -29,6 +29,27 @@
       "when": 1789938976320,
       "tag": "0003_square_umar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789938977320,
+      "tag": "0004_rls_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789938978320,
+      "tag": "0005_lock_down_rls_auto_enable",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789938979320,
+      "tag": "0006_rls_vendor_aliases",
+      "breakpoints": true
     }
   ]
 }
