@@ -1,4 +1,4 @@
-import { pool } from "@workspace/db";
+import { pool, getLockPool } from "@workspace/db";
 
 // Fixed, arbitrary advisory-lock keys. Vendor and news ingestion can still run
 // concurrently with each other (matching the old two-independent-flags
@@ -11,8 +11,10 @@ export type LockOutcome<T> = { skipped: false; result: T } | { skipped: true };
 // Session-level Postgres advisory lock. Must acquire/release on the same
 // connection, so a single client is checked out of the pool and held for the
 // duration of fn() rather than routed through the shared pool query helper.
+// getLockPool() is the session-mode pool, which matters when the main pool is
+// pointed at a transaction-mode pooler (DATABASE_POOL_URL).
 export async function withAdvisoryLock<T>(lockKey: number, fn: () => Promise<T>): Promise<LockOutcome<T>> {
-  const client = await pool.connect();
+  const client = await getLockPool().connect();
   try {
     const { rows } = await client.query<{ locked: boolean }>("SELECT pg_try_advisory_lock($1) AS locked", [lockKey]);
     if (!rows[0]?.locked) {
@@ -39,7 +41,7 @@ export async function withAdvisoryLock<T>(lockKey: number, fn: () => Promise<T>)
 // lock. The old approach checked out a dedicated client from the pool on every
 // call, and the frontend polls the two status endpoints every 10 seconds from
 // four components, so it was the single largest consumer of a connection
-// budget that tops out at 15 for the whole project. pool.query() checks a
+// budget that tops out at a fixed cap for the whole project. pool.query() checks a
 // client out and returns it as soon as the query resolves.
 //
 // pg_advisory_lock(bigint) records the key as classid = high 32 bits,
