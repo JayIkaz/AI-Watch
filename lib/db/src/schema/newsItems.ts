@@ -1,6 +1,7 @@
 import { pgTable, text, integer, boolean, timestamp, serial, real, index, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { publicRead } from "./rls";
 
 export const newsCredibilityEnum = pgEnum("news_credibility", [
   "verified",
@@ -36,7 +37,8 @@ export const newsItemsTable = pgTable("news_items", {
   index("news_items_source_type_idx").on(t.sourceType),
   index("news_items_credibility_idx").on(t.credibilityRating),
   index("news_items_detected_at_idx").on(t.detectedAt),
-]);
+  publicRead(),
+]).enableRLS();
 
 export const insertNewsItemSchema = createInsertSchema(newsItemsTable).omit({ id: true, detectedAt: true });
 export type InsertNewsItem = z.infer<typeof insertNewsItemSchema>;

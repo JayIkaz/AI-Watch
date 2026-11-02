@@ -2,6 +2,7 @@ import { pgTable, text, integer, timestamp, serial, index } from "drizzle-orm/pg
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { vendorsTable } from "./vendors";
+import { publicRead } from "./rls";
 
 // Maps the free-text strings that appear in news_items.mentioned_vendors onto
 // canonical vendors. The classifier emits whatever it likes ("Claude",
@@ -23,7 +24,8 @@ export const vendorAliasesTable = pgTable("vendor_aliases", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => [
   index("vendor_aliases_vendor_id_idx").on(table.vendorId),
-]);
+  publicRead(),
+]).enableRLS();
 
 export const insertVendorAliasSchema = createInsertSchema(vendorAliasesTable).omit({ id: true, createdAt: true });
 export type InsertVendorAlias = z.infer<typeof insertVendorAliasSchema>;

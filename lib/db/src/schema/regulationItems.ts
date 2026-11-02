@@ -1,6 +1,7 @@
 import { pgTable, text, timestamp, serial, real, date, index, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { publicRead } from "./rls";
 
 export const regulationTypeEnum = pgEnum("regulation_type", [
   "legislation",
@@ -51,7 +52,8 @@ export const regulationItemsTable = pgTable("regulation_items", {
   index("regulation_items_urgency_idx").on(t.urgency),
   index("regulation_items_deadline_idx").on(t.deadlineDate),
   index("regulation_items_detected_at_idx").on(t.detectedAt),
-]);
+  publicRead(),
+]).enableRLS();
 
 export const insertRegulationItemSchema = createInsertSchema(regulationItemsTable).omit({ id: true, detectedAt: true });
 export type InsertRegulationItem = z.infer<typeof insertRegulationItemSchema>;

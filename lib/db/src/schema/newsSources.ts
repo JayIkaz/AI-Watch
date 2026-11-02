@@ -1,5 +1,6 @@
 import { pgTable, text, integer, boolean, timestamp, serial, index } from "drizzle-orm/pg-core";
 import { newsSourceTypeEnum, newsCredibilityEnum } from "./newsItems";
+import { publicRead } from "./rls";
 
 export const newsSourcesTable = pgTable("news_sources", {
   id: serial("id").primaryKey(),
@@ -14,4 +15,5 @@ export const newsSourcesTable = pgTable("news_sources", {
   lastError: text("last_error"),
 }, (t) => [
   index("news_sources_active_idx").on(t.active),
-]);
+  publicRead(),
+]).enableRLS();

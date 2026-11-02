@@ -1,6 +1,7 @@
 import { pgTable, text, integer, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { publicRead } from "./rls";
 
 export const categoriesTable = pgTable("categories", {
   id: serial("id").primaryKey(),
@@ -8,7 +9,7 @@ export const categoriesTable = pgTable("categories", {
   name: text("name").notNull(),
   description: text("description"),
   color: text("color"),
-});
+}, () => [publicRead()]).enableRLS();
 
 export const insertCategorySchema = createInsertSchema(categoriesTable).omit({ id: true });
 export type InsertCategory = z.infer<typeof insertCategorySchema>;

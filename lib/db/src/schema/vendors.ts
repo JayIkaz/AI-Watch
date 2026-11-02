@@ -1,6 +1,7 @@
 import { pgTable, text, integer, boolean, timestamp, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { publicRead } from "./rls";
 
 export const vendorsTable = pgTable("vendors", {
   id: serial("id").primaryKey(),
@@ -13,7 +14,7 @@ export const vendorsTable = pgTable("vendors", {
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, () => [publicRead()]).enableRLS();
 
 export const insertVendorSchema = createInsertSchema(vendorsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertVendor = z.infer<typeof insertVendorSchema>;
