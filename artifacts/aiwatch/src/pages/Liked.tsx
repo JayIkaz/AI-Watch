@@ -133,20 +133,23 @@ export default function Liked() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 mb-8 p-1 bg-card/50 border border-border rounded-2xl w-fit">
+      <div className="flex items-center gap-1 mb-8 p-1 bg-card/50 border border-border rounded-2xl w-full sm:w-fit max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {(["updates", "news", "regulations"] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={cn(
-              "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all",
+              "flex items-center justify-center gap-1.5 sm:gap-2 flex-1 sm:flex-none shrink-0 whitespace-nowrap px-2 sm:px-5 py-2.5 rounded-xl text-sm font-medium transition-all",
               tab === t
                 ? "bg-background text-foreground shadow-sm border border-border"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {t === "updates" ? <Activity className="w-4 h-4" /> : t === "news" ? <Newspaper className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
-            {t === "updates" ? "Intelligence Updates" : t === "news" ? "News & Gossip" : "Regulation & Policy"}
+            <span className="hidden sm:inline-flex">
+              {t === "updates" ? <Activity className="w-4 h-4" /> : t === "news" ? <Newspaper className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
+            </span>
+            <span className="sm:hidden">{t === "updates" ? "Updates" : t === "news" ? "News" : "Regulation"}</span>
+            <span className="hidden sm:inline">{t === "updates" ? "Intelligence Updates" : t === "news" ? "News & Gossip" : "Regulation & Policy"}</span>
             {!isLoading && (
               <span className={cn(
                 "text-xs px-1.5 py-0.5 rounded-full font-semibold",
@@ -164,7 +167,7 @@ export default function Liked() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : total === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-muted-foreground bg-card/20 border border-dashed border-border rounded-3xl">
+        <div className="flex flex-col items-center justify-center py-24 px-4 text-muted-foreground bg-card/20 border border-dashed border-border rounded-3xl">
           <Heart className="w-14 h-14 mb-5 opacity-10" />
           <p className="text-xl font-semibold text-foreground mb-2">Nothing saved yet</p>
           <p className="text-sm text-center max-w-sm mb-6">
