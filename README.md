@@ -85,6 +85,7 @@ Always typecheck from the root. Every package extends `tsconfig.base.json` and u
 | `ANTHROPIC_API_KEY` | Claude API key for classification and summaries |
 | `ALLOWED_ORIGINS` | Comma-separated CORS origins |
 | `ADMIN_EMAILS` | Emails treated as admins |
+| `DATABASE_POOL_URL` | Optional. The same Supabase pooler in transaction mode (port 6543), used for ordinary queries so they stop counting against the session-mode connection cap. Falls back to `DATABASE_URL` when unset |
 | `DATABASE_POOL_MAX` | Optional. Maximum database connections per instance |
 | `LOG_LEVEL` | Optional. Log verbosity |
 
