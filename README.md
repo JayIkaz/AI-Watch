@@ -130,4 +130,4 @@ Open a pull request against `master`. Run `pnpm run typecheck` first.
 
 ## Licence
 
-MIT
+Copyright (c) Aukizan. All rights reserved. No licence is granted to use, copy, modify or distribute this code without written permission.
